@@ -1,12 +1,17 @@
 # wSIMCity:</br>Searching for DNA-adducts in DIA wide-SIM/MS<sup>2</sup> data
 
 ## Table of Contents  
+
 ###[Background](#background)
+
 ###[Overview of software](#overview)
+
 <p style="margin-left: 40px">
 [Scoring](#scoring)
 </p>
+
 ###[Getting started](#getstart)
+
 <p style="margin-left: 40px">
 [Installation](#installation)</br>
 [Dependencies](#dependencies)</br>
