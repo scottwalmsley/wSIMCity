@@ -2,9 +2,10 @@
 
 ## Table of Contents  
 
-###[Background](#background)
+</br>
+[Background](#background)</br>
 
-###[Overview of software](#overview)
+[Overview of software](#overview)</br>
 
 <p style="margin-left: 40px">
 [Scoring](#scoring)
