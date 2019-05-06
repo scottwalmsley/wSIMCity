@@ -157,14 +157,17 @@ This file describes one duty cycle on the instrument in DIA SIM mode and defines
 |NL|100|550|600|634|
 
 ##### Notes:
-```ScanType``` is one of either 'WSIM' or 'NL' used to denote the scan level (MS<sup>1</sup> or MS<sup>2</sup>).
-```WindowStart``` and ```WindowEnd``` indicate the start and end m/z values for the data collection m/z range as set at the instrument.
-```AquisitionStart``` and ```AqcuisitionEnd``` denote the start and end m/z values for the mass range you filtered your data on during the run.
+
+```ScanType``` is one of either 'WSIM' or 'NL' used to denote the scan level (MS<sup>1</sup> or MS<sup>2</sup>).</br>
+```WindowStart``` and ```WindowEnd``` indicate the start and end m/z values for the data collection m/z range as set at the instrument.</br>
+```AquisitionStart``` and ```AqcuisitionEnd``` denote the start and end m/z values for the mass range you filtered your data on during the run.</br>
 
 #####2. A MSDIAL parameters file.
+
 This file is the MSDIAL parameters file used with running the MSDIAL command line program.  wSIMCity will convert your raw data and then run MSDIAL to find features in your data.
 
 #####3. A file of adducts to search between MS scan levels.
+
 This is the tab delimited text file containing the list of adducts masses you wish to search.
 
 
