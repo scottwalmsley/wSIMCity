@@ -1,0 +1,16 @@
+Package: wSIMCity
+Type: Package
+Title: What the Package Does in One 'Title Case' Line
+Version: 1.0
+Date: 2019-04-19
+Author: Your Name
+Maintainer: Your Name <your@email.com>
+Description: One paragraph description of what the package does as one
+        or more full sentences.
+License: Apache 2.0
+Imports: Rcpp (>= 1.0.1),
+        mzR,
+        doParallel
+LinkingTo: Rcpp
+RoxygenNote: 6.1.1
+Encoding: UTF-8
