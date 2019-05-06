@@ -1,7 +1,20 @@
-# wSIMCity: mining for DNA-adducts using wide - SIM mass spectrometry
+# wSIMCity:</br>Searching for DNA-adducts in DIA wide-SIM/MS<sup>2</sup> data
 
+## Table of Contents  
+###[Background](#background)
+###[Overview of software](#overview)
+<p style="margin-left: 40px">
+[Scoring](#scoring)
+</p>
+###[Getting started](#getstart)
+<p style="margin-left: 40px">
+[Installation](#installation)</br>
+[Dependencies](#dependencies)</br>
+[Before you start](#beforestart)</br>
+</p>
+</br></br>
 
-## Background
+## Background<a name="background"/>
 
 Welcome to wSIMCity, software for mining Wide Sim mass spectrometry data.  wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center at the Univerity of Minnesota - Twin Cities in the laboratory of Prof. Rob Turesky, PhD.  Development of wSIMCity was brought about by necessity to overcome data structure issues in wide-SIM data independent acquisition (DIA) data produced in DNA-adduct mass spectrometry (MS) experiments.  As such we developed an R-package to process raw w-SIM DIA data and to mine for DNA-adducts in that data.  
 
@@ -25,7 +38,7 @@ Targeted extraction of molecules such as dG-C8-PhIP from this type of data is fa
 </br></br></br>
 
 
-## Overview of wSIMCity
+## Overview of wSIMCity<a name="overview"/>
 
 wSIMCity seeks to discover the 'landscape' or map of DNA-adducts in a DNA sample prepared for and analyzed using wide-SIM-MS.  The overall workflow is shown in the next figure:
 
@@ -41,7 +54,7 @@ wSIMCity seeks to discover the 'landscape' or map of DNA-adducts in a DNA sample
 
 Software developed for the DIA methods (and previously data dynamic acquisition (DDA) methodologies) have worked well, but are incompatible with our current wide-SIM scanning technique.   Therefor we have implemented a simple workaround using the R package ```mzR```, incorporated the MSDIAL feature finding algortihm, and devised a custom global modelling and search strategy to detect the adducts.   Extracted ion chromatograms (EIC) for candidate molecules are produced.  Further we devised a scheme to best levereage a global scoring method together with an individual scoring metric to help the researcher identify and pursue DNA-adduct identification.   The end result of wSIMCity is a targeted list masses and retention times for high energy dissociation MS and structural determination of the candidate molecules. 
 
-## Scoring
+## Scoring<a name="scoring"/>
 
 The best aspect of wSIMCIty is it produces a series of scores to help the researcher rummage through the list of candidate DNA-adducts.  
 
@@ -49,12 +62,18 @@ The score is broken down into several components. The first components are borro
 
 The second component to our scoring system uses global modeling.  Global modeling serves as a method to ensure the key assumtions in the 1st component scoring methods are correct, but also lets the researcher know about the overall quality of the group of scores produced for the putative DNA-adducts. The global model looks like this: 
 
+</br></br>
+
 <p align="center">
 <img src="images/model.png" title = "scanning" width ="400">
 </p>
 
+</br></br></br>
 
-## 1. Installation
+<a name="getstart"/>
+
+##Getting started
+## 1. Installation<a name="installation"/>
 Start by downloading and installing the source R package. Don't forget to set your .libPaths() environment if needed.
 ```{r}
 
@@ -65,7 +84,7 @@ devtools::install_github("scottwalmsley/wSIMCity")
 
 ```
 
-## 2. Dependencies
+## 2. Dependencies<a name="dependencies"/>
 #### Operating system:
 
 Please note that due to the fact that software for acquiring and processing the mass spectrometry data used in this workflow was developed for Windows operating systems.   While some functions can be adapted to run on other operating systems, the very fact that Windows is used to run the mass spectrometers, to convert raw data to mzML,  and to process data into feature lists means you will likely need to run this workflow using a Windows computer.</br>
@@ -93,7 +112,7 @@ wSIMCity::chckDependencies()
 2. MSDIal : for feature finding.
 
 
-## 3. Before you start:
+## 3. Before you start<a name="beforestart"/>:
 
 wSIMCity needs to have multiple items specified for it to work correctly.   
 
@@ -148,7 +167,7 @@ This is the tab delimited text file containing the list of adducts masses you wi
 
 ```
 
-  
+
 
 
 
