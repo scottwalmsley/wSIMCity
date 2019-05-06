@@ -131,7 +131,7 @@ wSIMCity needs to have multiple items specified for it to work correctly.
 
 #### These include:
 
-#####1. A scan definition file.  
+##### 1. A scan definition file.  
 
 This file describes one duty cycle on the instrument in DIA SIM mode and defines what the m/z ranges for the wide SIM-MS<sup>2</sup> are.  It is tab delimited and is in the form:
 
