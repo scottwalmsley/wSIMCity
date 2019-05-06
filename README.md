@@ -2,8 +2,11 @@
 
 ## Table of Contents  
 
+
+
+[Background](#background)
+
 </br>
-[Background](#background)</br>
 
 [Overview of software](#overview)</br>
 
