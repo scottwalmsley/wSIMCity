@@ -39,7 +39,19 @@ wSIMCity seeks to discover the 'landscape' or map of DNA-adducts in a DNA sample
 </br></br></br>
 
 
-Software developed for the DIA methods (and previously data dynamic acquisition (DDA) methodologies) have worked well, but are incompatible with our current wide-SIM scanning technique.   There for we have implemented a simple workaround using the R package ```mzR```, incorporated the MSDIAL feature finding algortihm, and devised a custom global modelling and search strategy to detect the adducts.   Extracted ion chromatograms (EIC) for candidate molecules are produced.  Further we devised a scheme to best levereage a global scoring method together with an individual scoring metric to help the researcher identify and pursue DNA-adduct identification.   The end result of wSIMCity is a targeted list masses and retention times for high energy dissociation MS and structural determination of the candidate molecules. 
+Software developed for the DIA methods (and previously data dynamic acquisition (DDA) methodologies) have worked well, but are incompatible with our current wide-SIM scanning technique.   Therefor we have implemented a simple workaround using the R package ```mzR```, incorporated the MSDIAL feature finding algortihm, and devised a custom global modelling and search strategy to detect the adducts.   Extracted ion chromatograms (EIC) for candidate molecules are produced.  Further we devised a scheme to best levereage a global scoring method together with an individual scoring metric to help the researcher identify and pursue DNA-adduct identification.   The end result of wSIMCity is a targeted list masses and retention times for high energy dissociation MS and structural determination of the candidate molecules. 
+
+## Scoring
+
+The best component of wSIMCIty is it produces a series of scores to help the researcher rummage through the list of candidate DNA-adducts.  
+
+The score is broken down into several components. The first components are borrowed from MSDIAL's scoring method for detecting similar features and for detecting molecules listed in a mass and retention database.  The key difference between our method and MSDIAL's is that the underlying assumptions about the distributive properties of the measured values in our data are a little differnt:  we use ppm mass errors to differentiate between real [M+H]+ and [B+H2]+ pairs of features and false hits.  These measured data points follow a Laplace distribution. We also, like MSDIAL, incorporate retention time as a metric.  Like MSDIAL, our assumption here follows a guassian distribition. [B+H2]+ ions ALWAYS follow their [M+H]+ ions by a single MS scan, so a strong emphasis is placed on the RT scoring.   
+
+The second component to our scoring system uses global modeling.  Global modeling serves as a method to ensure the key assumtions in the 1st component scoring methods are correct, but also lets the researcher know about the overall quality of the group of scores produced for the putative DNA-adducts. The global model looks like this: 
+
+<p align="center">
+<img src="images/model.png" title = "scanning" width ="600">
+</p>
 
 
 ## 1. Installation
