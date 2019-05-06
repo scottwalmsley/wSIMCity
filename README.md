@@ -43,14 +43,14 @@ Software developed for the DIA methods (and previously data dynamic acquisition 
 
 ## Scoring
 
-The best component of wSIMCIty is it produces a series of scores to help the researcher rummage through the list of candidate DNA-adducts.  
+The best aspect of wSIMCIty is it produces a series of scores to help the researcher rummage through the list of candidate DNA-adducts.  
 
-The score is broken down into several components. The first components are borrowed from MSDIAL's scoring method for detecting similar features and for detecting molecules listed in a mass and retention database.  The key difference between our method and MSDIAL's is that the underlying assumptions about the distributive properties of the measured values in our data are a little differnt:  we use ppm mass errors to differentiate between real [M+H]<sup>+</sup> and [B+H<sub>2</sub>]<sup>+</sup> pairs of features and false hits.  These measured data points follow a Laplace distribution. We also, like MSDIAL, incorporate retention time as a metric.  Like MSDIAL, our assumption here follows a guassian distribition. [B+H<sub>2</sub>]<sup>+</sup> ions ALWAYS follow their [M+H]<sup>+</sup> ions by a single MS scan, so a strong emphasis is placed on the RT scoring.   
+The score is broken down into several components. The first components are borrowed from MSDIAL's scoring method for detecting similar features and for detecting molecules listed in a mass and retention database.  The key difference between our method and MSDIAL's is that the underlying assumptions about the distributive properties of the measured values in our data are a little different:  we use ppm mass errors to differentiate between real [M+H]<sup>+</sup> and [B+H<sub>2</sub>]<sup>+</sup> pairs of features and false hits....that's to say for every [M+H]<sup>+</sup> ion, we compute a theroetical [M+H-dR]<sup>+</sup> m/z, and then look for [B+H<sub>2</sub>]<sup>+</sup> ions with that mass and retention time. We look for every ion with that m/z value and then measure how far off in ppm the experimental ion is. This measurement is called 'Mass err (ppm)' in the below plot.  These measured data points follow a Laplace distribution (well, more like a Cauchy distribution, but that is near imposible to deal with). We also, like MSDIAL, incorporate retention time as a metric.  Like MSDIAL, our assumption here follows a Guassian distribution. [B+H<sub>2</sub>]<sup>+</sup> ions ALWAYS follow their [M+H]<sup>+</sup> ions by a single MS scan, so a strong emphasis is placed on the RT scoring.   
 
 The second component to our scoring system uses global modeling.  Global modeling serves as a method to ensure the key assumtions in the 1st component scoring methods are correct, but also lets the researcher know about the overall quality of the group of scores produced for the putative DNA-adducts. The global model looks like this: 
 
 <p align="center">
-<img src="images/model.png" title = "scanning" width ="600">
+<img src="images/model.png" title = "scanning" width ="400">
 </p>
 
 
