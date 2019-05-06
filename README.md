@@ -8,11 +8,9 @@
 
 [Overview of software](#overview)</br>
 
-<p style="margin-left: 40px">[Scoring](#scoring)</p>
+[Scoring](#scoring)</p>
 
 [Getting started](#getstart)
-
-<p style="margin-left: 40px">
 
 [Installation](#installation)</br>
 
