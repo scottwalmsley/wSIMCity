@@ -6,21 +6,26 @@
 
 [Background](#background)
 
-</br>
-
 [Overview of software](#overview)</br>
 
 <p style="margin-left: 40px">
+
 [Scoring](#scoring)
+
 </p>
 
-###[Getting started](#getstart)
+[Getting started](#getstart)
 
 <p style="margin-left: 40px">
+
 [Installation](#installation)</br>
+
 [Dependencies](#dependencies)</br>
+
 [Before you start](#beforestart)</br>
+
 </p>
+
 </br></br>
 
 ## Background<a name="background"/>
