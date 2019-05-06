@@ -45,8 +45,9 @@ Targeted extraction of molecules such as dG-C8-PhIP from this type of data is fa
 
 </br></br></br>
 
+<a name="overview"/>
 
-## Overview of wSIMCity<a name="overview"/>
+## Overview of wSIMCity
 
 wSIMCity seeks to discover the 'landscape' or map of DNA-adducts in a DNA sample prepared for and analyzed using wide-SIM-MS.  The overall workflow is shown in the next figure:
 
@@ -81,7 +82,10 @@ The second component to our scoring system uses global modeling.  Global modelin
 <a name="getstart"/>
 
 ##Getting started
-## 1. Installation<a name="installation"/>
+
+<a name="installation"/>
+
+## 1. Installation
 Start by downloading and installing the source R package. Don't forget to set your .libPaths() environment if needed.
 ```{r}
 
@@ -92,7 +96,8 @@ devtools::install_github("scottwalmsley/wSIMCity")
 
 ```
 
-## 2. Dependencies<a name="dependencies"/>
+## 2. Dependencies
+
 #### Operating system:
 
 Please note that due to the fact that software for acquiring and processing the mass spectrometry data used in this workflow was developed for Windows operating systems.   While some functions can be adapted to run on other operating systems, the very fact that Windows is used to run the mass spectrometers, to convert raw data to mzML,  and to process data into feature lists means you will likely need to run this workflow using a Windows computer.</br>
