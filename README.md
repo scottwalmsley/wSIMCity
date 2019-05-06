@@ -2,6 +2,7 @@
 
 
 ##Background
+
 Welcome to wSIMCity, software for mining Wide Sim mass spectrometry data.  wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center at the Univerity of Minnesota - Twin Cities in the laboratory of Prof. Rob Turesky, PhD.  Development of wSIMCity was brought about by necessity to overcome data structure issues in wide-SIM data independent acquisition (DIA) data produced in DNA-adduct mass spectrometry (MS) experiments.  As such we developed an R-package to process raw w-SIM DIA data and to mine for DNA-adducts in that data.  
 
 wSIM-DIA methods were developed to increase sensitivity for DNA-adducts detected in digests of DNA and using mass spectrometry. More specfically, the automatic gain control (AGC) of orbitrap MS is used together with wide selected ion monitoring (wide-SIM) m/z ranges to boost sensitivity for the ions of interest. The wide-SIM MS^1 data is collected and then then subsequent scan undergoes a low energy collision induced dissociation (CID) of ~20meV.  This MS2 scan leverages the known neutral loss at low energy CID of a dexoyribose and serves as the tell tale sign of the presence of a DNA-adduct.   Turesky and group pioneered this altered DIA methodology and it likely will serve as a strategy for untargeted disvoery of novel DNA-adducts. The general mechanism is show below using the molecule dG-C8-PhIP, an important carcinogen of prostate caused by overcooked meats:</br>
@@ -25,6 +26,7 @@ Targeted extraction of molecules such as dG-C8-PhIP from this type of data is fa
 
 
 ##Overview of wSIMCity
+
 wSIMCity seeks to discover the 'landscape' or map of DNA-adducts in a DNA sample prepared for and analyzed using wide-SIM-MS.  The overall workflow is shown in the next figure:
 
 </br></br>
