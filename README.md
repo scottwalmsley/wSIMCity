@@ -4,25 +4,25 @@
 
 
 
-[Background](#background)
+* [Background](#background)
 
-[Overview of software](#overview)</br>
+* [Overview of software](#overview)</br>
 
-[Scoring](#scoring)</p>
+* [Scoring](#scoring)
 
-[Getting started](#getstart)
+* [Getting started](#getstart)
 
-[Installation](#installation)</br>
+* [Installation](#installation)</br>
 
-[Dependencies](#dependencies)</br>
+* [Dependencies](#dependencies)</br>
 
-[Before you start](#beforestart)</br>
+* [Before you start](#beforestart)</br>
 
-</p>
+
 
 </br></br>
 
-## Background<a name="background"/>
+## Background
 
 Welcome to wSIMCity, software for mining Wide Sim mass spectrometry data.  wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center at the Univerity of Minnesota - Twin Cities in the laboratory of Prof. Rob Turesky, PhD.  Development of wSIMCity was brought about by necessity to overcome data structure issues in wide-SIM data independent acquisition (DIA) data produced in DNA-adduct mass spectrometry (MS) experiments.  As such we developed an R-package to process raw w-SIM DIA data and to mine for DNA-adducts in that data.  
 
