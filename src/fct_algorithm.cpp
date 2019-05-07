@@ -86,7 +86,6 @@ NumericVector weight_laplace(NumericVector dM, double mu,double tol,double boost
   
   return boost*exp(-1* (abs(mu-dM)/tol));
 
-  
 }
 
 
