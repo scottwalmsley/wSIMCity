@@ -24,9 +24,12 @@
 
 ## Background
 
+
+
+
 Welcome to wSIMCity, software for mining Wide Sim mass spectrometry data.  wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center and the Institute for Health Informatics at the Univerity of Minnesota - Twin Cities for the laboratory of Prof. Rob Turesky, PhD.  Development of wSIMCity was brought about by necessity to overcome data structure issues in wide-SIM data independent acquisition (DIA) data produced in DNA-adduct mass spectrometry (MS) experiments, and to facilitate automated detection of DNA-adducts.  As such we developed an R-package to process raw wide-SIM DIA data and to mine for DNA-adducts in that data.  
 
-Wide-SIM data independent acquisition (DIA) methods were developed to increase sensitivity for detection of DNA-adducts in digests of DNA and using mass spectrometry. More specfically, the automatic gain control (AGC) of orbitrap MS is used together with wide selected ion monitoring (wide-SIM) m/z ranges to boost sensitivity for the ions of interest. The wide-SIM MS<sup>1</sup> data is collected and then the subsequent scan undergoes a low energy collision induced dissociation (CID) at ~25 millielectron volts (meV).  This MS<sup>2</sup> scan leverages the known neutral loss at low energy CID of a dexoyribose and serves as the tell tale sign of the presence of a DNA-adduct.   Turesky and group pioneered this altered DIA methodology and it likely will serve as a strategy for the untargeted discovery of novel DNA-adducts. The general mechanism is shown below using the molecule dG-C8-PhIP, an important carcinogen of prostate cells caused by ingestion of overcooked meats:</br>
+Wide-SIM data independent acquisition (DIA) methods were developed to increase sensitivity for detection of DNA-adducts in digests of DNA and using mass spectrometry. More specfically, the automatic gain control (AGC) of orbitrap MS is used together with wide selected ion monitoring (wide-SIM) *m/z* ranges to boost sensitivity for the ions of interest. The wide-SIM MS<sup>1</sup> data is collected and then the subsequent scan undergoes a low energy collision induced dissociation (CID) at ~25 millielectron volts (meV).  This MS<sup>2</sup> scan leverages the known neutral loss at low energy CID of a dexoyribose and serves as the tell tale sign of the presence of a DNA-adduct.   Turesky and group pioneered this altered DIA methodology and it likely will serve as a strategy for the untargeted discovery of novel DNA-adducts. The general mechanism is shown below using the molecule dG-C8-PhIP, an important carcinogen of prostate cells caused by ingestion of overcooked meats:</br>
 
 
 <p align="center">
@@ -69,9 +72,32 @@ The best aspect of wSIMCIty is it produces a series of scores to help the resear
 
 The score is broken down into several components. The first components are borrowed from MSDIAL's scoring method for matching detected compounds with those listed in a mass and retention database.  Instead, we use this scoreing method to match precursor - aglycone molecules found in DNA-adductomics data. 
 
-A major difference between our scoring method and MSDIAL's is that the underlying assumptions about the distributive properties of the measured values in our data are a little different:  we use ppm mass errors to differentiate between real [M+H]<sup>+</sup> and [B+H<sub>2</sub>]<sup>+</sup> pairs of features and false hits. Specifically, for every [M+H]<sup>+</sup> ion, we compute a theroetical [M+H-dR]<sup>+</sup> m/z, and then look for [B+H<sub>2</sub>]<sup>+</sup> ions with that mass and retention time. We look for every ion with that m/z value and then measure how far off in ppm the experimental ion is. This measurement is called 'Mass err (ppm)' in the below plot.  
+A major difference between our scoring method and MSDIAL's is that the underlying assumptions about the distributive properties of the measured values in our data are a little different:  we use ppm mass errors to differentiate between real [M+H]<sup>+</sup> and [B+H<sub>2</sub>]<sup>+</sup> pairs of features and false hits. Specifically, for every [M+H]<sup>+</sup> ion, we compute a theroetical [M+H-dR]<sup>+</sup> *m/z*, and then look for [B+H<sub>2</sub>]<sup>+</sup> ions with that mass and retention time. We look for every ion with that *m/z* value and then measure how far off in ppm the experimental ion is. This measurement is called 'Mass err (ppm)' in the below plot.  
 
 These measured data points follow a Laplace distribution (well, it's more like a Cauchy distribution, but that is near imposible to deal with in terms of the math involved). We also, like MSDIAL, incorporate retention time as a metric.  Like MSDIAL, our assumption here follows a Guassian distribution. [B+H<sub>2</sub>]<sup>+</sup> ions ALWAYS follow their [M+H]<sup>+</sup> ions by a single MS scan, so a strong emphasis is placed on the RT scoring.   
+
+
+The first component scores can be summarized by the following equation:
+</br></br>
+
+$\Large S_{NL}^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT}}$
+
+</br></br>
+
+....where ukn is the unknown feature, NL denotes 'neutral loss', ppm is the mass error in ppm, RT is retention time. $\Delta_{ppm}$ is the measured error between the theoretical NL *m/z* value and the measured peak *m/z* in the MS<sup>2</sup> data.   $\Delta_{RT}$   is the measured difference between the MS<sup>1</sup> and MS<sup>2</sup> features. $\alpha$ and $\beta$ are values between 0-1 that weight the significance of the $S^{\Delta_{ppm}}$ or $S^{\Delta_{RT}}$ scores....they must add up to 1.  The independent scores are equated using:
+
+</br></br>
+
+$\Large S^{\Delta_{ppm}} = exp^{-(\frac{|obs-ref|}{tol})}$          
+
+</br></br>
+
+$\Large S^{\Delta_{RT}} =  exp^{-\frac{1}{2}(\frac{|MS_{RT}^{2}-MS_{RT}^{1}|}{tol})^2}$ 
+
+</br></br>
+...where $tol$ is a user defined instrument mass tolerance window in ppm (*e.g.* 5 ppm) or expected max deviation of retention times for the MS<sup>1</sup> and MS<sup>2</sup> features. 
+
+
 
 The second component to our scoring system uses global modeling.  Global modeling serves as a method to ensure the key assumtions in the 1st component's scoring methods are correct. However, it also lets the researcher know about the overall quality of the group of scores produced for the putative DNA-adducts. The global model looks like this: 
 
@@ -137,10 +163,10 @@ wSIMCity needs to have multiple items specified for it to work correctly.
 
 #### 1. A scan definition file.  
 
-This file describes one duty cycle on the instrument in DIA SIM mode and defines what the m/z ranges for the wide SIM-MS<sup>2</sup> are.  It is tab delimited and is in the form:
+This file describes one duty cycle on the instrument in DIA SIM mode and defines what the *m/z* ranges for the wide SIM-MS<sup>2</sup> are.  It is tab delimited and is in the form:
 
 |ScanType|WindowStart|WindowEnd|AquisitionStart|AcquisitionEnd|
-|:------:|:---------:|:-------:|:-------------:|:-------------:|
+|:---:|:---:|:---:|:---:|:---:|
 |WSIM|197|364|330|364|
 |NL|100|550|330|364|
 |WSIM|197|394|360|394|
@@ -165,8 +191,8 @@ This file describes one duty cycle on the instrument in DIA SIM mode and defines
 ##### Notes:
 
 ```ScanType``` is one of either 'WSIM' or 'NL' used to denote the scan level (MS<sup>1</sup> or MS<sup>2</sup>).</br>
-```WindowStart``` and ```WindowEnd``` indicate the start and end m/z values for the data collection m/z range as set at the instrument.</br>
-```AquisitionStart``` and ```AqcuisitionEnd``` denote the start and end m/z values for the mass range you filtered your data on during the run.
+```WindowStart``` and ```WindowEnd``` indicate the start and end *m/z* values for the data collection *m/z* range as set at the instrument.</br>
+```AquisitionStart``` and ```AqcuisitionEnd``` denote the start and end *m/z* values for the mass range you filtered your data on during the run.
 
 #### 2. A MSDIAL parameters file.
 
@@ -176,8 +202,10 @@ This file is the MSDIAL parameters file used with running the MSDIAL command lin
 
 This is the tab delimited text file containing the list of adducts masses you wish to search.
 
-
-
+|Neutral Loss|MZ|
+|:---:|:---:|
+| dR | -116.0474 |
+| [<sup>13</sup>C]-dR |	-121.0641 |
 
 
 ##### Set your paths and environment variables.
