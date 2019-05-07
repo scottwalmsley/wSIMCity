@@ -1,6 +1,3 @@
-<script type="text/javascript" async src="scripts/MathJax.js?config=TeX-MML-AM_CHTML"></script>
-
-
 # wSIMCity:</br></br>Searching for DNA-adducts in DIA wide-SIM/MS<sup>2</sup> data
 
 </br>
@@ -84,7 +81,7 @@ These measured data points follow a Laplace distribution (well, it's more like a
 The first component scores can be summarized by the following equation:
 </br></br>
 
-$Large S<sub>N</sub>L^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT}}$
+$$S_{NL}^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT}}$$
 
 </br></br>
 
@@ -92,11 +89,16 @@ $Large S<sub>N</sub>L^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT
 
 </br></br>
 
-$\Large S^{\Delta_{ppm}} = exp^{-(\frac{|obs-ref|}{tol})}$          
+
+
+
+
+
+$$\Large S^{\Delta_{ppm}} = exp^{-(\frac{|obs-ref|}{tol})}$$          
 
 </br></br>
 
-$\Large S^{\Delta_{RT}} =  exp^{-\frac{1}{2}(\frac{|MS_{RT}^{2}-MS_{RT}^{1}|}{tol})^2}$ 
+$$\Large S^{\Delta_{RT}} =  exp^{-\frac{1}{2}(\frac{|MS_{RT}^{2}-MS_{RT}^{1}|}{tol})^2}$$
 
 </br></br>
 ...where $tol$ is a user defined instrument mass tolerance window in ppm (*e.g.* 5 ppm) or expected max deviation of retention times for the MS<sup>1</sup> and MS<sup>2</sup> features. 
@@ -220,12 +222,6 @@ This is the tab delimited text file containing the list of adducts masses you wi
 
 
 ```
-
-
-
-
-
-
 
 
 
