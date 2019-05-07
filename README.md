@@ -78,6 +78,38 @@ A major difference between our scoring method and MSDIAL's is that the underlyin
 These measured data points follow a Laplace distribution (well, it's more like a Cauchy distribution, but that is near imposible to deal with in terms of the math involved). We also, like MSDIAL, incorporate retention time as a metric.  Like MSDIAL, our assumption here follows a Guassian distribution. [B+H<sub>2</sub>]<sup>+</sup> ions ALWAYS follow their [M+H]<sup>+</sup> ions by a single MS scan, so a strong emphasis is placed on the RT scoring.   
 
 
+
+
+The first component scores can be summarized by the following equation:
+</br></br>
+
+$$S_{NL}^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT}}$$
+
+</br></br>
+
+....where ukn is the unknown feature, NL denotes 'neutral loss', ppm is the mass error in ppm, RT is retention time. $$\Delta_{ppm}$$ is the measured error between the theoretical NL *m/z* value and the measured peak *m/z* in the MS<sup>2</sup> data.   $$\Delta_{RT}$$   is the measured difference between the MS<sup>1</sup> and MS<sup>2</sup> features. $$\alpha$$ and $$\beta$$ are values between 0-1 that weight the significance of the $$S^{\Delta_{ppm}}$$ or $$S^{\Delta_{RT}}$$ scores....they must add up to 1.  The independent scores are equated using:
+
+</br></br>
+
+
+
+
+
+
+$$\Large S^{\Delta_{ppm}} = exp^{-(\frac{|obs-ref|}{tol})}$$          
+
+</br></br>
+
+$$\Large S^{\Delta_{RT}} =  exp^{-\frac{1}{2}(\frac{|MS_{RT}^{2}-MS_{RT}^{1}|}{tol})^2}$$
+
+</br></br>
+...where $tol$ is a user defined instrument mass tolerance window in ppm (*e.g.* 5 ppm) or expected max deviation of retention times for the MS<sup>1</sup> and MS<sup>2</sup> features. 
+
+
+
+
+
+
 The second component to our scoring system uses global modeling.  Global modeling serves as a method to ensure the key assumtions in the 1st component's scoring methods are correct. However, it also lets the researcher know about the overall quality of the group of scores produced for the putative DNA-adducts. The global model looks like this: 
 
 </br></br>
@@ -195,6 +227,5 @@ This is the tab delimited text file containing the list of adducts masses you wi
 
 
 ```
-
 
 
