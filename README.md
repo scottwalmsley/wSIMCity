@@ -24,18 +24,18 @@
 
 ## Background
 
-Welcome to wSIMCity, software for mining Wide Sim mass spectrometry data.  wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center at the Univerity of Minnesota - Twin Cities in the laboratory of Prof. Rob Turesky, PhD.  Development of wSIMCity was brought about by necessity to overcome data structure issues in wide-SIM data independent acquisition (DIA) data produced in DNA-adduct mass spectrometry (MS) experiments.  As such we developed an R-package to process raw w-SIM DIA data and to mine for DNA-adducts in that data.  
+Welcome to wSIMCity, software for mining Wide Sim mass spectrometry data.  wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center and the Institute for Health Informatics at the Univerity of Minnesota - Twin Cities for the laboratory of Prof. Rob Turesky, PhD.  Development of wSIMCity was brought about by necessity to overcome data structure issues in wide-SIM data independent acquisition (DIA) data produced in DNA-adduct mass spectrometry (MS) experiments, and to facilitate automated detection of DNA-adducts.  As such we developed an R-package to process raw wide-SIM DIA data and to mine for DNA-adducts in that data.  
 
-wSIM-DIA methods were developed to increase sensitivity for DNA-adducts detected in digests of DNA and using mass spectrometry. More specfically, the automatic gain control (AGC) of orbitrap MS is used together with wide selected ion monitoring (wide-SIM) m/z ranges to boost sensitivity for the ions of interest. The wide-SIM MS<sup>1</sup> data is collected and then then subsequent scan undergoes a low energy collision induced dissociation (CID) of ~20meV.  This MS2 scan leverages the known neutral loss at low energy CID of a dexoyribose and serves as the tell tale sign of the presence of a DNA-adduct.   Turesky and group pioneered this altered DIA methodology and it likely will serve as a strategy for untargeted disvoery of novel DNA-adducts. The general mechanism is show below using the molecule dG-C8-PhIP, an important carcinogen of prostate caused by overcooked meats:</br>
+Wide-SIM data independent acquisition (DIA) methods were developed to increase sensitivity for detection of DNA-adducts in digests of DNA and using mass spectrometry. More specfically, the automatic gain control (AGC) of orbitrap MS is used together with wide selected ion monitoring (wide-SIM) m/z ranges to boost sensitivity for the ions of interest. The wide-SIM MS<sup>1</sup> data is collected and then the subsequent scan undergoes a low energy collision induced dissociation (CID) at ~25 millielectron volts (meV).  This MS<sup>2</sup> scan leverages the known neutral loss at low energy CID of a dexoyribose and serves as the tell tale sign of the presence of a DNA-adduct.   Turesky and group pioneered this altered DIA methodology and it likely will serve as a strategy for the untargeted discovery of novel DNA-adducts. The general mechanism is shown below using the molecule dG-C8-PhIP, an important carcinogen of prostate cells caused by ingestion of overcooked meats:</br>
 
 
 <p align="center">
 <img src="images/mechanism.png" title = "mechanism">
 </p>
 
-The blue portion of the molecule is the mutagen or carcinogen, shown bound to the nucleoside (black and red).   MS2 CID (25meV) causes the neutral loss of a deoxyribose (dR, red) leading to the formation of Guanine-C8-PhIP.  Generally speaking, it has been shown that this mechanism is universal across as wide spectrum of mutated DNA adduct pairs.   The ions at the MS1 level are described in generally as presursor ions (denoted: [M+H]<sup>+</sup>), and the resulting ion after the neutral loss is called the 'aglycone' (denoted as: [B+H<sub>2</sub>]<sup>+</sup>).  Note the gain of a mobile proton, hence the '+H<sub>2</sub>'.
+The blue portion of the molecule is the mutagen or carcinogen, shown bound to the nucleoside (black and red).   MS<sup>2</sup> CID (25meV) causes the neutral loss of a deoxyribose (dR, red) leading to the formation of Guanine-C8-PhIP.  Generally speaking, it has been shown that this mechanism is universal across as wide spectrum of DNA adducts.   The ions at the MS<sup>1</sup> level are known as presursor ions (denoted: [M+H]<sup>+</sup>), and the resulting ion after the neutral loss is called the 'aglycone' (denoted as: [B+H<sub>2</sub>]<sup>+</sup>) because of the neutral loss of a deoxyribose.  Note the gain of a mobile proton on the aglycone molecule, hence the '+H<sub>2</sub>' notation.
 
-Targeted extraction of molecules such as dG-C8-PhIP from this type of data is fairly straightforward.   However, a major goal is to facilitate untargeted detection of DNA-adducts using this adaption to proteomics' / metabolomics' data independent acquisition (DIA) methodologies. Below is a figure showing the slight differences between proteomics/ metabolommics (A) for DIA and DDA methods, and methods developed for DNA adductomics (B and C). Included in panel B is DDA method for DNA work called constant neutral loss screening.  Panel C is the method for which this software was originally written:
+Targeted extraction of molecules such as dG-C8-PhIP from this type of data is fairly straightforward.   However, a major goal is to facilitate untargeted detection of DNA-adducts using this DIA based method. Below is a figure showing the slight differences between scanning methods common place in proteomics and metabolommics (A), and methods developed for DNA adductomics (B and C). Included in panel B is a DDA method for DNA adductomics  called constant neutral loss (CNL) screening.  Panel C is the method for which this software was originally written.  It is the very nature of the data structure produced in C that lead to incompatibilities with current DDA /DIA software developed for proteomics and metabolomics.
 
 </br></br>
 
@@ -131,7 +131,7 @@ wSIMCity needs to have multiple items specified for it to work correctly.
 
 #### These include:
 
-##### 1. A scan definition file.  
+#### 1. A scan definition file.  
 
 This file describes one duty cycle on the instrument in DIA SIM mode and defines what the m/z ranges for the wide SIM-MS<sup>2</sup> are.  It is tab delimited and is in the form:
 
@@ -164,11 +164,11 @@ This file describes one duty cycle on the instrument in DIA SIM mode and defines
 ```WindowStart``` and ```WindowEnd``` indicate the start and end m/z values for the data collection m/z range as set at the instrument.</br>
 ```AquisitionStart``` and ```AqcuisitionEnd``` denote the start and end m/z values for the mass range you filtered your data on during the run.
 
-##### 2. A MSDIAL parameters file.
+#### 2. A MSDIAL parameters file.
 
 This file is the MSDIAL parameters file used with running the MSDIAL command line program.  wSIMCity will convert your raw data and then run MSDIAL to find features in your data.
 
-##### 3. A file of adducts to search between MS scan levels.
+#### 3. A file of adducts to search between MS scan levels.
 
 This is the tab delimited text file containing the list of adducts masses you wish to search.
 
