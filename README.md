@@ -1,7 +1,11 @@
-# wSIMCity:</br>Searching for DNA-adducts in DIA wide-SIM/MS<sup>2</sup> data
+<script type="text/javascript" async src="scripts/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+
+
+# wSIMCity:</br></br>Searching for DNA-adducts in DIA wide-SIM/MS<sup>2</sup> data
+
+</br>
 
 ## Table of Contents  
-
 
 
 * [Background](#background)
@@ -80,7 +84,7 @@ These measured data points follow a Laplace distribution (well, it's more like a
 The first component scores can be summarized by the following equation:
 </br></br>
 
-$\Large S_{NL}^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT}}$
+$Large S<sub>N</sub>L^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT}}$
 
 </br></br>
 
