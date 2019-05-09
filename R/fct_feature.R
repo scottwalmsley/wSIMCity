@@ -15,6 +15,7 @@
 #'  #findPeaksMSDIAL("results/sample1/")
 #'
 findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_param_path){
+  require(doParallel)
   
   scandef <- read.delim(scandef_file)
   
@@ -39,12 +40,11 @@ findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_pa
     foreach::registerDoSEQ()
   }
   
-  require(doParallel)
-  
-  #cl = foreach(sub_analysis_path  = ld,.export = c("msdial_path","msdial_param_path")) %dopar% {
+ 
+  foreach(sub_analysis_path  = ld,.export = c("msdial_path","msdial_param_path")) %dopar% {
     
     
-  for(sub_analysis_path in ld){  
+  #for(sub_analysis_path in ld){  
     print("Step away, have a coffee..... this is a resource hog!")
     
     

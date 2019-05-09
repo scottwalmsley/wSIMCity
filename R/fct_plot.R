@@ -122,7 +122,7 @@ plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smoo
   par(mar = c(4,4,2,2))
   png(width = 300,height = 300,filename = fileHandle)
   
-  dev.neew()
+  #dev.new()
   plot(ms1_XIC, type="l", col= rgb(0.1,0.1,.9,0.8),lwd=2, bty="n",xlab = "", ylab = "", ylim = c(0,max_intensity*1.3),main = sub(".png","",fileHandle))
   
   lines(ms2_XIC,col=rgb(0.9,0.1,.1,0.8), lwd= 2)
@@ -152,11 +152,11 @@ plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smoo
 #' Get the list of sim windows
 #' 
 #' Retrieves the scan windows for plotting functions.
-#'
+#' @param scandef
 #' @return a character vector of scan windows
 #' @export 
 #'
-getSIMWindows = function(){
+getSIMWindows = function(scandef){
   
   list(simStart = unique(scandef[,4]),
        simEnd = unique(scandef[,5]),
@@ -179,6 +179,69 @@ getSIMWindows = function(){
 getRTRangeByRT <-function(RT,tol){    
   c(RT-tol, RT+tol)
 }
+
+
+
+#' getPlots
+#'
+#' @param searchResultList 
+#' @param scandef_file 
+#' @param sampleDir 
+#' @param min_score 
+#' @param min_intensity 
+#' @param ppm 
+#' @param rt_tol 
+#'
+#' @export
+#'
+#' @examples
+getPlots <- function(searchResultList,scandef_file,sampleDir,min_score = 0.95, min_intensity = 5000, ppm = 6,rt_tol = 1.5 ){
+  
+  require(mzR)
+  
+  
+  score_feature <- unlist(lapply(searchResultList, function(x)x$best_candidate$score_feature ))
+  mz <- unlist(lapply(searchResultList, function(x) x$search$mz))
+  intensity_1 <- unlist(lapply(searchResultList, function(x) x$search$intensity))
+  intensity_2 <- unlist(lapply(searchResultList, function(x) x$best_candidate$intensity))
+  
+  w <-  which(score_feature > min_score & mz > 330 & intensity_1 > min_intensity & intensity_2 > min_intensity)
+  
+  sub_list <- searchResultList[w]
+  
+  ms1_mz <- unlist(lapply(sub_list, function(x) x$search$mz))
+  
+  rt <- unlist(lapply(sub_list, function(x) x$search$rt))
+  
+  ms2_mz <- unlist(lapply(sub_list, function(x) x$best_candidate$mz))
+  
+  scandef <- read.delim(scandef_file)
+  
+  windows <- getSIMWindows(scandef)
+  
+  
+  lf <- list.files(path = sampleDir, pattern = "mzML", full.names = TRUE, recursive = TRUE)
+  
+  #msData <- lapply(lf, function(x) mzR::openMSfile(x))
+  #spectra <- lapply(msData, function(x) mzR::spectra(x))
+  #header <- lapply(msData, function(x) mzR::header(x))
+  
+  i<-1
+  for(mz in ms1_mz){
+    w = which(windows$simEnd > mz & windows$simStart < mz)
+    if(length(w)>1){
+      w <- w[1] # get the window with the highest sim range
+    }
+  if(length(w)>0){  
+    plotXIC(mz,ms2_mz[i],ppm = ppm, rt = rt[i], rt_tol = rt_tol, ms1_mzml_file = lf[w+10],ms2_mzml_file = lf[w],smooth = F )
+  }
+    
+    i <- i+1
+    
+  }
+  
+}
+
 
 
 

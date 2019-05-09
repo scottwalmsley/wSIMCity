@@ -5,21 +5,21 @@
 ## Table of Contents  
 
 
-* [Background](#background)
+[Background](#background)
 
-* [Overview of software](#overview)</br>
+[Overview of software](#overview)</br>
 
-* [Scoring](#scoring)
+[Scoring](#scoring)
 
-* [Getting started](#getstart)
+[Getting started](#getstart)
 
-* [Installation](#installation)</br>
+[Installation](#installation)</br>
 
-* [Dependencies](#dependencies)</br>
+[Dependencies](#dependencies)</br>
 
-* [Before you start](#beforestart)</br>
+[Before you start](#beforestart)</br>
 
-
+[Usage](#usage)</br>
 
 </br></br>
 
@@ -76,36 +76,6 @@ The score is broken down into several components. The first components are borro
 A major difference between our scoring method and MSDIAL's is that the underlying assumptions about the distributive properties of the measured values in our data are a little different:  we use ppm mass errors to differentiate between real [M+H]<sup>+</sup> and [B+H<sub>2</sub>]<sup>+</sup> pairs of features and false hits. Specifically, for every [M+H]<sup>+</sup> ion, we compute a theroetical [M+H-dR]<sup>+</sup> *m/z*, and then look for [B+H<sub>2</sub>]<sup>+</sup> ions with that mass and retention time. We look for every ion with that *m/z* value and then measure how far off in ppm the experimental ion is. This measurement is called 'Mass err (ppm)' in the below plot.  
 
 These measured data points follow a Laplace distribution (well, it's more like a Cauchy distribution, but that is near imposible to deal with in terms of the math involved). We also, like MSDIAL, incorporate retention time as a metric.  Like MSDIAL, our assumption here follows a Guassian distribution. [B+H<sub>2</sub>]<sup>+</sup> ions ALWAYS follow their [M+H]<sup>+</sup> ions by a single MS scan, so a strong emphasis is placed on the RT scoring.   
-
-
-
-
-The first component scores can be summarized by the following equation:
-</br></br>
-
-$$S_{NL}^{unk} = \alpha * S^{\Delta_{ppm}} +  \beta * S^{\Delta_{RT}}$$
-
-</br></br>
-
-....where ukn is the unknown feature, NL denotes 'neutral loss', ppm is the mass error in ppm, RT is retention time. $$\Delta_{ppm}$$ is the measured error between the theoretical NL *m/z* value and the measured peak *m/z* in the MS<sup>2</sup> data.   $$\Delta_{RT}$$   is the measured difference between the MS<sup>1</sup> and MS<sup>2</sup> features. $$\alpha$$ and $$\beta$$ are values between 0-1 that weight the significance of the $$S^{\Delta_{ppm}}$$ or $$S^{\Delta_{RT}}$$ scores....they must add up to 1.  The independent scores are equated using:
-
-</br></br>
-
-
-
-
-
-
-$$\Large S^{\Delta_{ppm}} = exp^{-(\frac{|obs-ref|}{tol})}$$          
-
-</br></br>
-
-$$\Large S^{\Delta_{RT}} =  exp^{-\frac{1}{2}(\frac{|MS_{RT}^{2}-MS_{RT}^{1}|}{tol})^2}$$
-
-</br></br>
-...where $tol$ is a user defined instrument mass tolerance window in ppm (*e.g.* 5 ppm) or expected max deviation of retention times for the MS<sup>1</sup> and MS<sup>2</sup> features. 
-
-
 
 
 
@@ -219,13 +189,101 @@ This is the tab delimited text file containing the list of adducts masses you wi
 | [<sup>13</sup>C]-dR |	-121.0641 |
 
 
-##### Set your paths and environment variables.
+
+
+# Usage
+
+
+## check dependencies
+```{r}
+library(wSIMCity)
+wSIMCity::checkDependencies()
+```
+
+
+## Set paths
 
 ```{r}
+
+msconvert_path <- "C:\\Program Files\\ProteoWizard\\ProteoWizard 3.0.18229.34f38e1eb\\msconvert.exe"
+
+results_dir <- "test/results"
+
+raw_file_dir <- "test/raw"
+
+scandef_file <- "test/scandef.txt"
+
+msdial_path <- "C:\\MSTOOLS\\MSDIALv3.66\\MsdialConsoleApp.exe"
+
+msdial_param_path <- "test\\msdial_param.txt"
+
+neutral_loss_list_file <- "test\\nl_list.txt"
 
 
 
 
 ```
+
+## List your raw files and samples that are to be analyzed
+```{r}
+
+raw_file_list <- getRawFileList(raw_file_dir)
+
+sample_names <- getSampleNames(raw_file_dir)
+
+sample_names
+
+```
+
+## Prepare analysis results folders
+```{r}
+
+dir.create(result_dir <- "test/results")
+
+makeSampleDir(result_dir,sample_names, scandef_file = "test/scandef.txt")
+
+sample_directories <- getSampleDirectories(results_dir)
+
+sample_directories
+
+```
+
+
+## Convert raw file
+```{r}
+
+convertRaw(raw_file_dir = raw_file_dir, msconvert_path = msconvert_path)
+
+```
+
+## Segment the mzML datafile
+```{r}
+
+segmentMzMLDataSample(raw_file_dir, sample_directories, scandef_file = scandef_file)
+
+```
+
+## Search mzml files with msdial
+```{r}
+
+findPeaksMSDIALSample(sample_directories,scandef_file, msdial_path, msdial_param_path)
+
+```
+
+## Retrieve the MS-DIAL results
+```{r}
+
+msdial_results <- getMSDIAL_results(sample_directories[1])
+
+
+```
+## Model the neutral losses
+```{r}
+
+searchResults <- modelNLM(simdata,neutral_loss_list_file = neutral_loss_list_file, nCore = 10)
+
+```
+
+## Plot the results and look at the data
 
 

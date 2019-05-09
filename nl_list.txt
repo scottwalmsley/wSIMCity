@@ -1,0 +1,3 @@
+Neutral Loss	MZ
+ dR	-116.0474
+ [13C]dR	-121.0641
