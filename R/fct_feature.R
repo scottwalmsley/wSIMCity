@@ -44,7 +44,6 @@ findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_pa
   foreach(sub_analysis_path  = ld,.export = c("msdial_path","msdial_param_path")) %dopar% {
     
     
-  #for(sub_analysis_path in ld){  
     print("Step away, have a coffee..... this is a resource hog!")
     
     

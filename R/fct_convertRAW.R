@@ -50,14 +50,19 @@ getSampleNames <- function(raw_file_dir){
 makeSampleDir <-function(result_dir,sample_names, scandef_file){
   
   
-  #if(!dir.exists(result_dir)){
+  
   l <- lapply(sample_names,function(x)
     dir.create(path = paste(result_dir,"/",x,sep=""))
-  )#}
+  )
   
   
   l <- lapply(sample_names, function(x)
     makeSIMDir(scandef_file,paste(result_dir,"/",x,sep=""))
+  )
+  
+  
+  l <- lapply(sample_names,function(x)
+    dir.create(path = paste(result_dir,"/",x,"/plots",sep=""))
   )
   
 }

@@ -29,7 +29,7 @@ getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
   
   mzRange  <- getMassTolRange(mz,ppm)  # I like 6ppm in hi res orbitrap data that I'm working with
   
-
+  
   
   i<-1## index for retention time
   out <- matrix(nrow = length(w), ncol = 2)
@@ -56,7 +56,7 @@ getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
         
       }
       
-    
+      
     }
     
     i<-i+1 
@@ -99,7 +99,7 @@ getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
 #' @export
 #'
 
-plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smooth = TRUE, sp = NULL, plot_dir=NULL){
+plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smooth = TRUE, sp = NULL, sampleDir=NULL, title = NULL){
   require(mzR)
   ms1_raw_data <- mzR::openMSfile(ms1_mzml_file)
   ms2_raw_data <- mzR::openMSfile(ms2_mzml_file)
@@ -110,19 +110,24 @@ plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smoo
   ms1_header <- mzR::header(ms1_raw_data)
   ms2_header <- mzR::header(ms2_raw_data) 
   
-  ms1_XIC <- getXIC(ms1_spectra,ms1_header,mz = ms1_mz,ppm=ppm,rt=rt,rt_tol=rt_tol,smooth = smooth, sp = sp)
+  ms1_XIC <- getXIC(ms1_spectra,ms1_header,mz = ms1_mz,ppm=ppm,rt=rt,rt_tol=rt_tol, smooth = smooth, sp = sp)
   ms2_XIC <- getXIC(ms2_spectra,ms2_header,mz = ms2_mz,ppm=ppm,rt=rt,rt_tol=rt_tol, smooth = smooth, sp = sp)  
   
   max_intensity <- max(
     max_ms1_intensity <- ms1_XIC[which( ms1_XIC[,2] == max(ms1_XIC[,2])),2],
     max_ms2_intensity <- ms2_XIC[which( ms2_XIC[,2] == max(ms2_XIC[,2])),2] )
   
-
-  fileHandle <- paste(round(ms1_mz,4),"@",round(rt,2),".png",sep="")
+  
+  if(!is.null(title) & !is.null(sampleDir)){
+    fileHandle <- paste(sampleDir,"/plots/",title,"_",round(ms1_mz,4),"@",round(rt,2),".png",sep="")
+  }else{
+    fileHandle <- paste(sampleDir,"/plots/",round(ms1_mz,4),"@",round(rt,2),".png",sep="")
+  }
+  
   par(mar = c(4,4,2,2))
   png(width = 300,height = 300,filename = fileHandle)
   
-  #dev.new()
+  
   plot(ms1_XIC, type="l", col= rgb(0.1,0.1,.9,0.8),lwd=2, bty="n",xlab = "", ylab = "", ylim = c(0,max_intensity*1.3),main = sub(".png","",fileHandle))
   
   lines(ms2_XIC,col=rgb(0.9,0.1,.1,0.8), lwd= 2)
@@ -130,7 +135,11 @@ plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smoo
   dev.off()
   
   
-  fileHandle <- paste(round(ms1_mz,4),"@",round(rt,2),".pdf",sep="")
+  if(!is.null(title) & !is.null(sampleDir)){
+    fileHandle <- paste(sampleDir,"/plots/",title,"_",round(ms1_mz,4),"@",round(rt,2),".pdf",sep="")
+  }else{
+    fileHandle <- paste(sampleDir,"/plots/",round(ms1_mz,4),"@",round(rt,2),".pdf",sep="")
+  }
   
   pdf(width = 2.5,height = 2.5,file = fileHandle, pointsize = 7)
   
@@ -142,11 +151,60 @@ plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smoo
   dev.off()
   
   
-  
-  
-  
 }
 
+
+
+#' Plot XIC of known ions
+#' 
+#' Generates an EIC of a known compound.
+#'
+#' @param scandef_file 
+#' @param sampleDir 
+#' @param ppm 
+#' @param rt_tol 
+#' @export
+#'
+plotKnowns <- function(scandef_file, sampleDir,ppm = 6, rt_tol = 1.5){
+  
+  data("knowns.db")
+  
+  w <- which(knowns.db$Type =="M")
+  
+  ms1_mz <- knowns.db$MZ[w]
+  ms2_mz <- knowns.db$MZ[-w]
+  
+  ms1_nm <- knowns.db$Adduct[w]  
+  ms2_nm <- knowns.db$Adduct[-w]
+  
+  rt <- knowns.db$RT[w]
+  
+  scandef <- read.delim(scandef_file)
+  windows <- getSIMWindows(scandef)
+  
+  
+  lf <- list.files(path = sampleDir, pattern = "mzML", full.names = TRUE, recursive = TRUE)
+  
+  for(i in 1:length(ms1_mz)){
+    
+    w = which(windows$simEnd > ms1_mz[i] & windows$simStart < ms1_mz[i])
+    
+    if(length(w)>1){
+      
+      w <- w[1] 
+      
+    }
+    
+    if(length(w)>0){  
+      
+      plotXIC(ms1_mz[i],ms2_mz[i],ppm=ppm,rt=rt[i],rt_tol=rt_tol,ms1_mzml_file = lf[w+10],ms2_mzml_file = lf[w],smooth = FALSE, title = ms1_nm[i], sampleDir = sampleDir)
+      
+    }
+    
+    
+  }
+  
+}
 
 
 #' Get the list of sim windows
@@ -195,17 +253,17 @@ getRTRangeByRT <-function(RT,tol){
 #' @export
 #'
 #' @examples
-getPlots <- function(searchResultList,scandef_file,sampleDir,min_score = 0.95, min_intensity = 5000, ppm = 6,rt_tol = 1.5 ){
+getPlots <- function(searchResultList,scandef_file,sampleDir,min_score = 0.95, min_intensity = 1000, ppm = 6,rt_tol = 1.5 , min_ratio = 10){
   
   require(mzR)
-  
   
   score_feature <- unlist(lapply(searchResultList, function(x)x$best_candidate$score_feature ))
   mz <- unlist(lapply(searchResultList, function(x) x$search$mz))
   intensity_1 <- unlist(lapply(searchResultList, function(x) x$search$intensity))
   intensity_2 <- unlist(lapply(searchResultList, function(x) x$best_candidate$intensity))
+  ratio <- unlist(lapply(searchResultList,function(x) x$best_candidate$ratio_intensity))
   
-  w <-  which(score_feature > min_score & mz > 330 & intensity_1 > min_intensity & intensity_2 > min_intensity)
+  w <-  which(score_feature > min_score & mz > 330 & intensity_1 > min_intensity & intensity_2 > min_intensity & ratio > (1/min_ratio) & ratio < min_ratio)
   
   sub_list <- searchResultList[w]
   
@@ -222,22 +280,27 @@ getPlots <- function(searchResultList,scandef_file,sampleDir,min_score = 0.95, m
   
   lf <- list.files(path = sampleDir, pattern = "mzML", full.names = TRUE, recursive = TRUE)
   
-  #msData <- lapply(lf, function(x) mzR::openMSfile(x))
-  #spectra <- lapply(msData, function(x) mzR::spectra(x))
-  #header <- lapply(msData, function(x) mzR::header(x))
+  plot_dir <- paste(sampleDir,"/plots",sep="")
   
   i<-1
+  
   for(mz in ms1_mz){
+    
     w = which(windows$simEnd > mz & windows$simStart < mz)
+    
     if(length(w)>1){
+      
       w <- w[1] # get the window with the highest sim range
+      
     }
-  if(length(w)>0){  
-    plotXIC(mz,ms2_mz[i],ppm = ppm, rt = rt[i], rt_tol = rt_tol, ms1_mzml_file = lf[w+10],ms2_mzml_file = lf[w],smooth = F )
-  }
+    
+    if(length(w)>0){  
+      
+      plotXIC(mz,ms2_mz[i],ppm = ppm, rt = rt[i], rt_tol = rt_tol, ms1_mzml_file = lf[w+10],ms2_mzml_file = lf[w],smooth = F, sampleDir = sampleDir)
+      
+    }
     
     i <- i+1
-    
   }
   
 }

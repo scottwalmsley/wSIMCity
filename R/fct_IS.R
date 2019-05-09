@@ -8,12 +8,14 @@
 #' @export
 #'
 #' @examples getInternalStandards()
-getInternalStandards <- function(msdial_results){
+getInternalStandards <- function(msdial_results,file = NULL){
 
-  IS = as.character(knowns_db$Adduct)
-  MH = knowns_db$MZ[which(knowns_db$Type == "M")]
-  BH = knowns_db$MZ[which(knowns_db$Type == "B")]
-  RT = knowns_db$RT[1:24]
+  data("knowns.db")
+  
+  IS = as.character(knowns.db$Adduct)
+  MH = knowns.db$MZ[which(knowns.db$Type == "M")]
+  BH = knowns.db$MZ[which(knowns.db$Type == "B")]
+  RT = knowns.db$RT[1:24]
 
   int_mat = data.frame()
   rt_tol = 0.5
@@ -43,7 +45,7 @@ getInternalStandards <- function(msdial_results){
 
   }
 
-  write.csv(file = "ID_IS_human.csv",int_mat)
+  write.csv(file = file,int_mat)
 
 
 }
