@@ -282,8 +282,13 @@ msdial_results <- getMSDIAL_results(sample_directories[1])
 
 searchResults <- modelNLM(simdata,neutral_loss_list_file = neutral_loss_list_file, nCore = 10)
 
+
 ```
 
-## Plot the results and look at the data
+## Plot the best candidates
+```{r}
+
+getPlots(searchResults[[1]],sampleDir = sample_directories[1],scandef_file = scandef_file,ppm = 6,min_score = 0.95,min_intensity = 5000,rt_tol = 1.5)
 
 
+```
