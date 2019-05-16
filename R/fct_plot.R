@@ -67,6 +67,8 @@ getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
   if(smooth){
     
     smooth_data <- smooth.spline(out[,1],out[,2],spar = sp)
+    n = spline(smooth)
+    
     mat <- as.matrix(cbind(smooth_data$x, smooth_data$y))
     
     mat[which(mat[,2]<0),2] <- 0
@@ -307,4 +309,183 @@ getPlots <- function(searchResultList,scandef_file,sampleDir,min_score = 0.95, m
 
 
 
+#' Detect a peak in an XIC
+#'
+#' @param XIC matrix of the XIC
+#' @param rt numeric rt of the peak in minutes
+#'
+#' @return matrix of the detected peak
+#' @export
+#'
+detectPeak <- function(XIC,rt){
+  
+  n = spline(XIC[,1],XIC[,2])
+  n$y[which(n$y<0)] = 0  
+  
+  #plot(n, type= "l", ylim = c(-30000,60000))
+  
+  der = diff(n$y)
+  der = c(0,der)
+  rder = round(der)
+  der2 = diff(rder)
+  der2 = c(0,der2)
+  der3 = diff(der2)
+  der3 = c(0,der3)
+  
+  
+  mat  = matrix(nrow = length(n$x),ncol=3)
+  mat[,1] = sign(rder)
+  mat[,2] = sign(der2)
+  mat[,3] = sign(der3)
+  mat[which(mat==0)] = -1
+  mat = cbind(mat,n$x,n$y)
+  
+  
+  
+  j=k=1
+  last = -1
+  peaks = list()
+  newPk = NULL
+  
+  #which.min(abs(newPk[,1] - rt))
+  
+  
+  for(i in 1:nrow(mat)){
+    
+    vec = mat[i,]
+    
+    if(last == -1 & sum(vec[1:2])==2){
+      if(!is.null(newPk)){
+        w.max = which.max(newPk[,2])
+        peaks[[k]] = list("XIC" =n , "area" =sum(newPk[,2],na.rm = T), max.intensity = newPk[w.max,2], "peak" = newPk,"mode_x" = newPk[w.max,1] )
+        newPk = NULL
+        k=k+1
+      }
+      if(is.null(newPk)){
+        newPk = vec[4:5]
+      }
+     
+    }
+    if(!is.null(newPk)){
+     
+      newPk = rbind(newPk,vec[4:5])
+    }
+    
+    j=j+1
+    
+    last = vec[1]	
+    
+    
+  }
+  rt.pk = sapply(peaks, function(x) x$mode_x)
+  if(length(peaks) ==0)
+    return(NULL)
+  
+  w = which.min(abs(rt.pk-rt))
+  peaks[[w]]
+}
 
+
+
+#' plots and XIC and detects the peak in it
+#'
+#' @param ms1_mz numeric ms1 mz
+#' @param ms2_mz numeric ms2 mz
+#' @param ppm numeric ppm tolerance for extraciton
+#' @param rt numeric retention time in minutes
+#' @param rt_tol numeric retention time window in minutes
+#' @param smooth boolean T/F to apply a smoothing function
+#' @param sp numeric the spar for the smoother, typically 0.12
+#' @param sampleDir character vector of the sample directory containing the mzML files
+#' @param title character vector of the title to use in the plot
+#'
+#' @export
+#'
+plotPeak <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,smooth = FALSE, sp = NULL, sampleDir=NULL, file = NULL){
+  require(mzR)
+  
+  scandef <- read.delim(scandef_file)
+  
+  windows <- getSIMWindows(scandef)
+  w = which(windows$simEnd > ms1_mz & windows$simStart < ms1_mz)
+  if(length(w)>1){
+    
+    w <- w[1] # get the window with the highest sim range
+    
+  }
+  
+  
+  lf <- list.files(path = sampleDir, pattern = "mzML", full.names = TRUE, recursive = TRUE)
+  
+  g <- grep(paste(windows$simStart[w],windows$simEnd[w],sep="_") ,lf)
+  lf <- lf[g]
+  
+  g <- grep(paste("WSIM",windows$simStart[w],windows$simEnd[w],sep="_"),lf)
+  ms1_mzml_file <- lf[g] 
+  ms2_mzml_file <-lf[-g]
+  
+  ms1_raw_data <- mzR::openMSfile(ms1_mzml_file)
+  ms2_raw_data <- mzR::openMSfile(ms2_mzml_file)
+  
+  ms1_spectra <- mzR::spectra(ms1_raw_data)
+  ms2_spectra <- mzR::spectra(ms2_raw_data)
+  
+  ms1_header <- mzR::header(ms1_raw_data)
+  ms2_header <- mzR::header(ms2_raw_data) 
+  
+  ms1_XIC <- getXIC(spectra = ms1_spectra,
+                    header = ms1_header,
+                    mz = ms1_mz,ppm=ppm,rt=rt,rt_tol=rt_tol, smooth = smooth, sp = sp)
+  ms2_XIC <- getXIC(spectra= ms2_spectra,
+                    header = ms2_header,
+                    mz = ms2_mz,ppm=ppm,rt=rt,rt_tol=rt_tol, smooth = smooth, sp = sp)  
+  
+  
+  pk_ms1 = detectPeak(ms1_XIC,rt)
+  pk_ms2 = detectPeak(ms2_XIC,rt)
+  
+  if(is.null(pk_ms1) | is.null(pk_ms2)){
+    return(NULL)
+    #return(0)
+  }
+  
+  max.int = c(pk_ms1$max.intensity,pk_ms2$max.intensity)
+  
+  max.int = max.int[which.max(max.int)]
+  main.txt = paste(round(ms1_mz,4),"@",round(rt,2),sep="")
+  
+  
+  if(!is.null(file)){
+    pdf(width = 4,height = 4,file = file, pointsize = 8)
+  }
+  
+  par(mar = c(4,4,1,1))
+  plot(pk_ms1$XIC, type="l", col=4, lwd=2, ylim = c(0,max.int*1.1), bty="n",
+       main = main.txt,
+       xlab = expression(paste(italic("t")["R"]," (min)")), ylab = "", las= 2)
+  lines(pk_ms2$XIC, type="l", col=2, lwd=2)
+  
+  lines(pk_ms2$peak,type = "h", lwd = 2,col=rgb(0.9,0.0,0.0,0.23))
+  lines(pk_ms1$peak,type = "h", lwd = 2,col=rgb(0.1,0.1,0.9,0.23))
+  
+  sp2 = spline(pk_ms2$peak, n = 100)
+  sp1 = spline(pk_ms1$peak, n = 100)
+  
+  y1 = sp1$y
+  y2 = sp2$y
+  
+  cr = cor(y2,y1, method = "spearman")
+  
+  text(min(pk_ms1$XIC$x )+rt_tol*0.1,max.int*0.8,
+       paste("Area MS1: ",round(pk_ms1$area),"\n",
+             "Area MS2: ", round(pk_ms2$area),"\n",
+             "RA: ", round(pk_ms2$area/pk_ms1$area,2),"\n",
+             "RI: ", round(pk_ms2$max.intensity/pk_ms1$max.intensity,2),"\n",
+             "cor: ", round(cr,2),sep="")
+       ,cex = 1,pos= 4)
+  
+  if(!is.null(file)){
+    dev.off()
+  }
+  
+}

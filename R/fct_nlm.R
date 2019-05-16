@@ -16,7 +16,7 @@
 #' @return
 #' @export
 #'
-modelNLM <- function(data_X,data_Y = NULL, neutral_loss_list_file, boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = 5, nCore = 1){
+modelNLM <- function(data_X,data_Y = NULL, neutral_loss_list_file, boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = 10, nCore = 1){
   
   
   PROTON = 1.007825032
@@ -24,7 +24,7 @@ modelNLM <- function(data_X,data_Y = NULL, neutral_loss_list_file, boost = 2,alp
   print("Modelling data.....")
   
   
-  nl_list <- read.delim(neutral_loss_list_file)
+  nl_list <- read.delim(neutral_loss_list_file, sep="\t")
   
   NLM = nl_list$MZ
   
@@ -38,15 +38,18 @@ modelNLM <- function(data_X,data_Y = NULL, neutral_loss_list_file, boost = 2,alp
   # This step prepares to get a model developed
   dM <- lapply(searchResultList, function(y) unlist(lapply(y, function(x) x$deltas$dM_ppm)) )
   
-  mod_mz <- laplace_unif_EM(unlist(dM),instrument_tol = instrument_tol,boost=boost)
+  mod_mz <- lapply(dM, function(x) laplace_unif_EM(x,instrument_tol = instrument_tol,boost=boost))
   
   x <- seq(-ppm_window,ppm_window,by=2*ppm_window/211)
   
-  d_lap <- dlaplace(x,mod_mz$mu, mod_mz$b)
+  d_lap <- lapply(mod_mz, function(mod) dlaplace(x,mod$mu, mod$b))
   
-  searchResultList <- lapply(searchResultList,function(x) getNLMScore(x,mod_mz))
+  searchResultList <- lapply(searchResultList,function(x) getNLMScore(x,mod_mz[[1]]))
   
-  searchResultList
+  if(!is.null(data_Y)){
+    rm(data_Y)
+  }
+  list("results" = searchResultList,"model" = mod_mz)
   
 
 }
@@ -92,7 +95,7 @@ modelNLM_run <- function(msdial_results, instrument_tol = 5,boost=0){
 #' @param nCore 
 #' @return
 #' @export
-search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, data_Y, ppm_window = 30,rt_tol = 0.2, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = 5,nCore = 1){
+search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, data_Y, ppm_window = 30,rt_tol = 0.2, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = 10,nCore = 1){
  options(warn = -1)
   require(doParallel)
   
@@ -105,28 +108,28 @@ search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, da
   
   cat(paste("Searching wSIM MS2 NL data for", adduct_name, "loss,", adduct_mass,"Da\n"))
   
-  exportList <- c("ppm_window","rt_tol","alpha_mz","beta_rt","instrument_tol")
+ # exportList <- c("ppm_window","rt_tol","alpha_mz","beta_rt","instrument_tol")
   searchResultList <- #list() 
   
-    foreach(i = seq_len(nrow(data_X)), .export = exportList, .packages = c("foreach","wSIMCity")) %dopar% {
-      #foreach(i = 33000:34000, .export = exportList, .packages = c("foreach","wSIMCity")) %dopar% {
-
-   # searchResultList[[i]] = 
+    foreach(i = seq_len(nrow(data_X)), .packages = c("foreach","wSIMCity")) %dopar% {
+  
     search_mass(data_X_row = data_X[i,],data_Y = data_Y,
               adduct_mass = adduct_mass,
               adduct_name = adduct_name,
               ppm_window = ppm_window,
               rt_tol=rt_tol,alpha_mz = alpha_mz,
               beta_rt = beta_rt, instrument_tol=instrument_tol)
-    
-   # sm
+
   }
 
   if(nCore> 1){
     stopCluster(cl)
   }
   
-  options(warn = -1)
+  
+  
+  rm(data_Y)
+    options(warn = -1)
   return(plyr::compact(searchResultList))
 
 }
@@ -146,7 +149,7 @@ search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, da
 #' @param instrument_tol 
 #' @return
 #' @export
-search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.0473, adduct_name = "dR",ppm_window = 30, rt_tol = 0.2, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = 5 ){
+search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.0473, adduct_name = "dR",ppm_window = 30, rt_tol = 0.2, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = 10 ){
 
   data_X_row <- as.data.frame(data_X_row)
   data_Y <- as.data.frame(data_Y)
@@ -163,14 +166,13 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
     
     search_result <- data_Y[w,]
    
-    
-    
     dM <- search_result$mz - (data_X_row$mz + adduct_mass)
     
     dM_ppm <- dM / (data_X_row$mz-adduct_mass)*1e6
     
     dRT <- data_Y$rt[w] - data_X_row$rt
-    
+   
+    rm(data_Y)
     
     ratios <- data.frame("ratio_area" = search_result$area / data_X_row$area, "ratio_intensity" = search_result$intensity / data_X_row$intensity)
     

@@ -14,7 +14,7 @@
 #'
 #'  #findPeaksMSDIAL("results/sample1/")
 #'
-findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_param_path){
+findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_param_path, nCore = 1){
   require(doParallel)
   
   scandef <- read.delim(scandef_file)
@@ -32,8 +32,8 @@ findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_pa
   print("Step away, have a coffee..... this is a resource hog!")
   
   #cluster = makeCluster(nCore / 2)
-  if(detectCores() > 3){
-    cluster = parallel::makeCluster(parallel::detectCores() - 2)
+  if(nCore > 1){
+    cl <- parallel::makeCluster(nCore)
     doParallel::registerDoParallel(cluster)
   }
   else{
@@ -43,9 +43,7 @@ findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_pa
  
   foreach(sub_analysis_path  = ld,.export = c("msdial_path","msdial_param_path")) %dopar% {
     
-    
     print("Step away, have a coffee..... this is a resource hog!")
-    
     
     system2(command = msdial_path, args = c("lcmsdda", paste("-i ",sub_analysis_path,"/ ",sep=""),paste("-o",sub_analysis_path),paste("-m",msdial_param_path)))
     Sys.sleep(15)

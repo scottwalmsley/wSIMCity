@@ -189,6 +189,15 @@ score_feature  =  function(dM,aM,tolM,drt,aR,tolR){
 
 
 
+#' Get a mass tolerance window
+#'
+#' @param m 
+#' @param ppm 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 getMassTolRange <- function(m,ppm){
   
   dM <- ppm*m/1e6

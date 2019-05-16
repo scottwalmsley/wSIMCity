@@ -15,7 +15,6 @@
 #'
 msdial_data <- function(fh = NULL){
   
-  
   require(data.table)
   
   cat(paste("   ...processing subfile:",fh,"\n"))
@@ -23,36 +22,31 @@ msdial_data <- function(fh = NULL){
   d <- read.delim(fh, header= T)
 
   mz <- d$Precursor.m.z
-
   rt <- d$RT.min.
 
   adduct <- d$AdductIon
-
   isotope <- d$Isotope
 
   height <- d$Height
-
   area <- d$Area
 
   rowID <- d$PeakID
 
   name <- d$MetaboliteName
-  
   comment <- d$Comment
 
   dt <- data.table(peak_index = rowID,
                
                rt = rt,
-               
                mz = mz,
                    
                intensity = height,
-             
                area = area,
              
                adduct_type = adduct,
-             
-               isotope = isotope
+               isotope = isotope,
+               
+               comment = comment
              
             )
 
@@ -76,25 +70,21 @@ msdial_data <- function(fh = NULL){
 msdial_combineDataFiles = function(sample_directory){
 
   cat(paste("processing msdial results for file:",sample_directory,"\n"))
-
   lf = list.files(pattern = "msdial$", path = sample_directory, full.names = T, recursive = F)
 
   nl_files = lf[grep("NL_", lf)]
-  
   wsim_files = lf[grep("WSIM_",lf)]
 
   wsim_data = lapply(wsim_files,function(x) msdial_data(fh = x) )
   nl_data = lapply(nl_files,function(x) msdial_data(fh = x) )
 
   wsim_list = wsim_data[[1]]
-  
   nl_list = nl_data[[1]]
 
  
   for(i in 2:length(wsim_data)){
     
     wsim_list = rbind(wsim_list,wsim_data[[i]])
-    
     nl_list = rbind(nl_list,nl_data[[i]])
   
   }
