@@ -217,11 +217,10 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
 #' @export
 getNLMScore <- function(searchResultList, mod_mz){
   
-
-  
   for(i in seq_len(length(searchResultList))){
+
     search_result = searchResultList[[i]]
-   # print(i)    
+       
     score <- dlaplace(X=search_result$deltas$dM_ppm, m = mod_mz$mu, b = mod_mz$b) / (mod_mz$unif)
     
     score <- 2*log(score)

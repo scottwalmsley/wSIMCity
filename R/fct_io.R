@@ -20,7 +20,9 @@ write_NLM_results = function(searchResultList,fh){
 
   for(search_result in searchResultList){
     
-    line <- paste(as.character(c(search_result$search[1:5],search_result$best_candidate[c(1:5,8:18)])),collapse = "\t")
+    #cat(paste(line),"\n")
+    
+    line <- paste(as.character(c(search_result$search[1:5],search_result$best_candidate[c(1:5,9:19)])),collapse = "\t")
     out_line = c(out_line,line)    
     
   }
