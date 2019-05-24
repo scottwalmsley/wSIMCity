@@ -88,8 +88,13 @@ msdial_combineDataFiles = function(sample_directory){
     nl_list = rbind(nl_list,nl_data[[i]])
   
   }
-  
+  index <- seq_len(nrow(wsim_list))
+  wsim_list <- cbind("index" = index, wsim_list)
 
+  index <- seq_len(nrow(nl_list))
+  nl_list <- cbind("index" = index, nl_list)
+  
+  
   list("wsim" = wsim_list,"nl" = nl_list)
 
 }

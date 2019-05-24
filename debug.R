@@ -1,0 +1,20 @@
+dset <- modelNLM(data_X = msdial_results[[i]][[1]]$wsim[1:1000,], 
+                 data_Y = msdial_results[[i]][[1]]$wsim[1:1000,],
+                 adduct_mass = 1.003355,
+                 adduct_name = "isotope",
+                 instrument_tol = 10,
+                 boost = 3, 
+                 nCore = 10)
+i=1
+data_X = msdial_results[[i]][[1]]$wsim[1:10000,]
+data_Y = msdial_results[[i]][[1]]$wsim[1:10000,]
+adduct_mass = 1.003355
+adduct_name = "isotope"
+instrument_tol = 10
+boost = 3
+nCore = 10
+rt_tol = 0.2
+ppm_window = 30
+
+alpha_mz = 0.5
+beta_rt = 0.5
