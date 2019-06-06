@@ -140,7 +140,7 @@ similarityScore_laplace <- function(deltaVal,tol){
 #' weight_laplace
 #'
 #' Assigned a weight to the distribution of X values given expected instrument performance.
-#' For example, dM is the input X values, tol is a tolderance in ppm, and boost is the multiplier.
+#' For example, dM is the input X values, tol is a tolerance in ppm, and boost is the multiplier.
 #'
 #' @param dM vector or numeric the vector of measurement errors
 #' @param tol numeric the ppm tolerance of the instrument
@@ -191,10 +191,10 @@ score_feature  =  function(dM,aM,tolM,drt,aR,tolR){
 
 #' Get a mass tolerance window
 #'
-#' @param m 
-#' @param ppm 
+#' @param m numeric mass
+#' @param ppm numeric ppm tolerance
 #'
-#' @return
+#' @return numeric vector containing minimum and maximum data values
 #' @export
 #'
 #' @examples

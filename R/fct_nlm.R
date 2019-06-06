@@ -15,7 +15,7 @@
 #' @return
 #' @export
 #'
-modelNLM <- function(data_X,data_Y = NULL, adduct_mass = 116.0474, adduct_name = "dR", boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = 10, nCore = 1){
+modelNLM <- function(data_X,data_Y = NULL, adduct_mass = 116.0474, adduct_name = "dR", boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = 20, nCore = 1){
   
   
   PROTON = 1.007825032

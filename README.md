@@ -77,9 +77,6 @@ A major difference between our scoring method and MSDIAL's is that the underlyin
 
 These measured data points follow a Laplace distribution (well, it's more like a Cauchy distribution, but that is near imposible to deal with in terms of the math involved). We also, like MSDIAL, incorporate retention time as a metric.  Like MSDIAL, our assumption here follows a Guassian distribution. [B+H<sub>2</sub>]<sup>+</sup> ions ALWAYS follow their [M+H]<sup>+</sup> ions by a single MS scan, so a strong emphasis is placed on the RT scoring.   
 
-
-
-
 The second component to our scoring system uses global modeling.  Global modeling serves as a method to ensure the key assumtions in the 1st component's scoring methods are correct. However, it also lets the researcher know about the overall quality of the group of scores produced for the putative DNA-adducts. The global model looks like this: 
 
 </br></br>
@@ -92,20 +89,23 @@ The second component to our scoring system uses global modeling.  Global modelin
 
 <a name="getstart"/>
 
+
+A simple likelihood value (like a probability) is produced from this statistical distribution of mass errors for the neutral loss.   The final score is simply the the probability multiplied by the previous feature score, very simple.
+
+
 ## Getting started
 
 <a name="installation"/>
 
 ## 1. Installation
-Start by downloading and installing the source R package. Don't forget to set your .libPaths() environment if needed.
+Start by downloading and installing the source R package. Don't forget to set your .libPaths() environment if needed:
 ```{r}
 
 .libPaths("path to R library folder")
 
-devtools::install_github("scottwalmsley/wSIMCity")
-
-
 ```
+To finish installation, we strongly suggest downloading the repository as a zip package.   Then create a new R package using R-studio pointing to your un-zipped folder.   Then use the install button in RStudio to complete the installation into your R library.
+
 
 ## 2. Dependencies
 
@@ -202,7 +202,6 @@ wSIMCity::checkDependencies()
 
 
 ## Set paths
-
 ```{r}
 
 msconvert_path <- "C:\\Program Files\\ProteoWizard\\ProteoWizard 3.0.18229.34f38e1eb\\msconvert.exe"
@@ -217,25 +216,26 @@ msdial_path <- "C:\\MSTOOLS\\MSDIALv3.66\\MsdialConsoleApp.exe"
 
 msdial_param_path <- "test\\msdial_param.txt"
 
-neutral_loss_list_file <- "test\\nl_list.txt"
-
-
-
-
 ```
+
+
 
 ## List your raw files and samples that are to be analyzed
 ```{r}
 
 raw_file_list <- getRawFileList(raw_file_dir)
 
+
 sample_names <- getSampleNames(raw_file_dir)
+
 
 sample_names
 
+
 ```
 
-## Prepare analysis results folders
+
+## prepare analysis results folders
 ```{r}
 
 dir.create(result_dir <- "test/results")
@@ -244,51 +244,96 @@ makeSampleDir(result_dir,sample_names, scandef_file = "test/scandef.txt")
 
 sample_directories <- getSampleDirectories(results_dir)
 
+
 sample_directories
+
+
 
 ```
 
 
-## Convert raw file
+
+
+## convert raw file
 ```{r}
 
 convertRaw(raw_file_dir = raw_file_dir, msconvert_path = msconvert_path)
 
 ```
 
-## Segment the mzML datafile
+
+
+## now segment the mzML datafile
 ```{r}
 
 segmentMzMLDataSample(raw_file_dir, sample_directories, scandef_file = scandef_file)
 
 ```
 
-## Search mzml files with msdial
+
+
+
+## search mzml files with msdial
 ```{r}
 
-findPeaksMSDIALSample(sample_directories,scandef_file, msdial_path, msdial_param_path)
+lapply(sample_directories, function(x) findPeaksMSDIAL(sample_directory = x,scandef_file = scandef_file, msdial_path, msdial_param_path,nCore=10))
 
 ```
+
 
 ## Retrieve the MS-DIAL results
 ```{r}
 
-msdial_results <- getMSDIAL_results(sample_directories[1])
+msdial_results <- lapply(sample_directories, function(x) getMSDIAL_results(x))
 
 
 ```
-## Model the neutral losses
+
+
+## Now perform the search on each file
+A user friendly function to perform this loop will be available soon
 ```{r}
+for(i in 1:length(msdial_results)){
 
-searchResults <- modelNLM(simdata,neutral_loss_list_file = neutral_loss_list_file, nCore = 10)
+ dset <- modelNLM(data_X = msdial_results[[i]][[1]]$wsim, 
+ 								 data_Y = msdial_results[[i]][[1]]$wsim,
+ 								 adduct_mass = -116.0474,
+ 								 adduct_name = "isotope",
+ 								 instrument_tol = 10,
+ 								 neutral_loss_mass, 
+ 								 boost = 3, 
+ 								 nCore = 1)
 
+   fh = paste("dR_results_",sub(paste(results_dir,"/",sep=""),"",sample_directories[i]),".tsv", sep="")
+       write_NLM_results(dset$results, fh=fh)
 
+   mod = dset$model
+      fh = paste("model_",sub(paste(results_dir,"/",sep=""),"",sample_directories[i]),".rda", sep="")
+         save(file = fh, mod)
+         
+}
 ```
+
+## Extract your knowns
+```{r}
+getInternalStandards(msdial_results = msdial_results[[1]][[1]],search_tol = 20,rt_tol = 0.5,alpha_mz = 0.6,beta_rt = 0.4,out_file_name = "ctDNA1.csv")
+```
+
 
 ## Plot the best candidates
+This plots the best candidates for the chosen filter
 ```{r}
 
 getPlots(searchResults[[1]],sampleDir = sample_directories[1],scandef_file = scandef_file,ppm = 6,min_score = 0.95,min_intensity = 5000,rt_tol = 1.5)
 
 
 ```
+
+##  Coming soon:
+Details for using non wide-SIM data!   Check back in ~1day (6/7/2019)
+
+
+
+
+
+

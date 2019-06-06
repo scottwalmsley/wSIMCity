@@ -11,7 +11,7 @@
 getInternalStandards <- function(msdial_results,search_tol=5, rt_tol = 0.2,alpha_mz,beta_rt, out_file_name){
   
   
-  data("knowns.db")
+  data("knowns_db")
   
   IS = as.character(knowns.db$Adduct)
   

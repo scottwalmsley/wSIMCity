@@ -407,13 +407,14 @@ plotPeak <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,smooth = FALSE, sp = NULL, samp
   scandef <- read.delim(scandef_file)
   
   windows <- getSIMWindows(scandef)
+ 
   w = which(windows$simEnd > ms1_mz & windows$simStart < ms1_mz)
+  
   if(length(w)>1){
     
     w <- w[1] # get the window with the highest sim range
     
   }
-  
   
   lf <- list.files(path = sampleDir, pattern = "mzML", full.names = TRUE, recursive = TRUE)
   
