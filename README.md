@@ -1,3 +1,4 @@
+#! As we refine the usability of our code, please feel free to contribute by submitting issues! Your insight is always welcome !#
 # wSIMCity:</br></br>Searching for DNA-adducts in DIA wide-SIM/MS<sup>2</sup> data
 
 </br>
