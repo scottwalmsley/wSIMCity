@@ -179,27 +179,11 @@ This file describes one duty cycle on the instrument in DIA SIM mode and defines
 
 This file is the MSDIAL parameters file used with running the MSDIAL command line program.  wSIMCity will convert your raw data and then run MSDIAL to find features in your data.
 
-#### 3. A file of adducts to search between MS scan levels.
-
-This is the tab delimited text file containing the list of adducts masses you wish to search.
-
-|Neutral Loss|MZ|
-|:---:|:---:|
-| dR | -116.0474 |
-| [<sup>13</sup>C]-dR |	-121.0641 |
-
-
+#### 3. A list of adducts to search between MS scan levels.
+You provide these as input to the neutral loss modelling step: modelNLM(adduct_mass = -116.0474), etc.
 
 
 # Usage
-
-
-## check dependencies
-```{r}
-library(wSIMCity)
-wSIMCity::checkDependencies()
-```
-
 
 ## Set paths
 ```{r}
@@ -300,7 +284,6 @@ for(i in 1:length(msdial_results)){
  								 adduct_mass = -116.0474,
  								 adduct_name = "isotope",
  								 instrument_tol = 10,
- 								 neutral_loss_mass, 
  								 boost = 3, 
  								 nCore = 1)
 
