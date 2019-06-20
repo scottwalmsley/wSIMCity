@@ -14,7 +14,7 @@
 #' @export
 #'
 #'
-getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
+getXIC <- function(spectra,header,mz,ppm=NULL,mzdec=NULL, rt,rt_tol,rt_offset = NULL, smooth = TRUE,sp = NULL){
   
   ## Filter scans by RT store for extraction of mz (likely more efficient)
   
@@ -27,8 +27,12 @@ getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
   rtVals <- header$retentionTime[w]
   ## Now extract the range of needed mz and intensities
   
-  mzRange  <- getMassTolRange(mz,ppm)  # I like 6ppm in hi res orbitrap data that I'm working with
-  
+  if(!is.null(ppm)){
+      mzRange  <- getMassTolRange(mz,ppm)  # I like 6ppm in hi res orbitrap data that I'm working with
+  }
+  if(!is.null(mzdec)){
+    mzRange <- c(mz-mzdec, mz+mzdec)
+  }
   
   
   i<-1## index for retention time
@@ -85,6 +89,78 @@ getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
 
 
 
+getRawXIC <- function(spectra,header,mz,ppm=NULL,mzdec=NULL, rtmin,rtmax,smooth = FALSE,sp = NULL){
+  
+  ## Filter scans by RT store for extraction of mz (likely more efficient)
+  
+  #rtRange <- getRTRangeByRT(rt*60,rt_tol*60)   #+/- 1.5 min, mzR reads in seconds
+  
+  w <- which(header$retentionTime > rtmin*60 & header$retentionTime < rtmax*60)
+  
+  subsetOfSpectra <- spectra[w]
+  
+  rtVals <- header$retentionTime[w]
+  ## Now extract the range of needed mz and intensities
+  
+  if(!is.null(ppm)){
+    mzRange  <- getMassTolRange(mz,ppm)  # I like 6ppm in hi res orbitrap data that I'm working with
+  }
+  if(!is.null(mzdec)){
+    mzRange <- c(mz-mzdec, mz+mzdec)
+  }
+  
+  
+  i<-1## index for retention time
+  out <- matrix(nrow = length(w), ncol = 3)
+  out[,2] = rtVals/60
+  out[,3] = 0
+  out[,1] = NA
+  
+  for(spectrum in subsetOfSpectra){  
+    
+    w <- which(spectrum[,1] > mzRange[1] & spectrum[,1] < mzRange[2])
+    
+    if(length(w) > 0){
+      
+      spectrum <- spectrum[w,]
+      
+      if(length(w) > 1){
+        
+        # Handles multiple mz within tol, in thiscase extract the closest by mass.   
+        # Hopefully intensity matches expected modality
+        w.min <- which.min(abs(spectrum[,1]-mz))
+        w.max <- which.max(abs(spectrum[,1]-mz))
+        mz.min <- spectrum[,]
+        spectrum <- spectrum[w.min,]  
+        
+        
+      }
+      out[i,1] <- spectrum[1]
+      out[i,3] <- spectrum[2]
+      
+    }
+    
+    i<-i+1 
+  }
+  
+  mat <- out
+  
+  if(smooth){
+    
+    smooth_data <- smooth.spline(out[,2],out[,3],spar = sp)
+    n = spline(smooth)
+    
+    mat <- as.matrix(cbind(mat[,1],smooth_data$x, smooth_data$y))
+    
+    mat[which(mat[,3]<0),3] <- 0
+    
+  }
+  
+  mat[which(is.na(mat[,1])),1] = mean(mat[,1],na.rm=T)
+  mat 
+}
+
+
 
 #' Plot an extracted ion chromatogram
 #' 
@@ -100,7 +176,6 @@ getXIC <- function(spectra,header,mz,ppm,rt,rt_tol, smooth = TRUE,sp = NULL){
 #'
 #' @export
 #'
-
 plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smooth = TRUE, sp = NULL, sampleDir=NULL, title = NULL){
   require(mzR)
   ms1_raw_data <- mzR::openMSfile(ms1_mzml_file)
@@ -154,6 +229,15 @@ plotXIC <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,ms1_mzml_file,ms2_mzml_file,smoo
   
   
 }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -485,6 +569,83 @@ plotPeak <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,smooth = FALSE, sp = NULL, samp
              "cor: ", round(cr,2),sep="")
        ,cex = 1,pos= 4)
   
+  if(!is.null(file)){
+    dev.off()
+  }
+  
+}
+
+
+
+
+
+plotRAWPeak <- function(ms1_mz,ms2_mz,ppm,rtmin,rtmax,smooth = FALSE, sp = NULL, sampleDir=NULL, file = NULL){
+  require(mzR)
+  
+  scandef <- read.delim(scandef_file)
+  
+  windows <- getSIMWindows(scandef)
+  
+  w = which(windows$simEnd > ms1_mz & windows$simStart < ms1_mz)
+  
+  if(length(w)>1){
+    
+    w <- w[1] # get the window with the highest sim range
+    
+  }
+  
+  lf <- list.files(path = sampleDir, pattern = "mzML", full.names = TRUE, recursive = TRUE)
+  
+  g <- grep(paste(windows$simStart[w],windows$simEnd[w],sep="_") ,lf)
+  lf <- lf[g]
+  
+  g <- grep(paste("WSIM",windows$simStart[w],windows$simEnd[w],sep="_"),lf)
+  ms1_mzml_file <- lf[g] 
+  ms2_mzml_file <-lf[-g]
+  
+  ms1_raw_data <- mzR::openMSfile(ms1_mzml_file)
+  ms2_raw_data <- mzR::openMSfile(ms2_mzml_file)
+  
+  ms1_spectra <- mzR::spectra(ms1_raw_data)
+  ms2_spectra <- mzR::spectra(ms2_raw_data)
+  
+  ms1_header <- mzR::header(ms1_raw_data)
+  ms2_header <- mzR::header(ms2_raw_data) 
+  
+  ms1_XIC <- getRAWXIC(spectra = ms1_spectra,
+                    header = ms1_header,
+                    mz = ms1_mz,ppm=ppm,rtmin=rtmin,rtmax=rtmax, smooth = smooth, sp = sp)
+  ms2_XIC <- getXIC(spectra= ms2_spectra,
+                    header = ms2_header,
+                    mz = ms2_mz,ppm=ppm,rtmin=rtmin,rtmax=rtmax, smooth = smooth, sp = sp)  
+  
+  
+  #pk_ms1 = detectPeak(ms1_XIC,rt)
+  #pk_ms2 = detectPeak(ms2_XIC,rt)
+  
+  if(is.null(pk_ms1) | is.null(pk_ms2)){
+    return(NULL)
+    #return(0)
+  }
+  
+  max.int = c(pk_ms1$max.intensity,pk_ms2$max.intensity)
+  
+  max.int = max.int[which.max(max.int)]
+  main.txt = paste(round(ms1_mz,4),"@",round(rt,2),sep="")
+  
+  
+  if(!is.null(file)){
+    pdf(width = 4,height = 4,file = file, pointsize = 8)
+  }
+  
+  par(mar = c(4,4,1,1))
+  plot(ms1_XIC, type="l", col=4, lwd=2, ylim = c(0,max.int*1.1), bty="n",
+       main = main.txt,
+       xlab = expression(paste(italic("t")["R"]," (min)")), ylab = "", las= 2)
+  lines(ms2_XIC, type="l", col=2, lwd=2)
+  
+
+
   if(!is.null(file)){
     dev.off()
   }

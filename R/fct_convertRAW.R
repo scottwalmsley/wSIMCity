@@ -65,6 +65,10 @@ makeSampleDir <-function(result_dir,sample_names, scandef_file){
     dir.create(path = paste(result_dir,"/",x,"/plots",sep=""))
   )
   
+  l <- lapply(sample_names,function(x)
+    dir.create(path = paste(result_dir,"/",x,"/results",sep=""))
+  )
+  
 }
 
 

@@ -10,69 +10,77 @@
 #' @param alpha_mz numeric value, 0-1 to weight the mz search score.
 #' @param beta_rt numeric value, 0-1 to weight the rt search score. Alpha and beta must add up to 1.
 #' @param instrument_tol the instrument tolerance window for the search score, usually 10ppm.
-#' @param nCore numeric integer number of cores to use in the analysis.
-#'
 #' @return
 #' @export
 #'
-modelNLM <- function(data_X,data_Y = NULL, adduct_mass = 116.0474, adduct_name = "dR", boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = 20, nCore = 1){
+modelNLM <- function(data_X,data_Y = NULL,sampleDir, adduct_list, boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
   
   
   PROTON = 1.007825032
   
   print("Modelling data.....")
   
-  
+  adduct_masses <- adduct_list$MZ
+  adduct_names <- adduct_list$Neutral.Loss
   
   # Search the adduct - neutral loss pairs
   
-  searchResultList <-  search_adduct(adduct_mass = adduct_mass,
-                                     adduct_name = adduct_name,
-                                     data_X = data_X, 
-                                     data_Y = data_Y, 
-                                     rt_tol = rt_tol, 
-                                     ppm_window = ppm_window,
-                                     nCore = nCore)
+  searchResults <- vector(mode = "list", length = length(adduct_masses))
   
-  # This step prepares to get a model developed
-  dM <- unlist(lapply(searchResultList, function(x) x$deltas$dM_ppm)) 
-  dM <- plyr::compact(dM)
-  
-  mod_mz <- laplace_unif_EM(dM,instrument_tol = instrument_tol,boost=boost)
-  
-  x <- seq(-ppm_window,ppm_window,by=2*ppm_window/211)
-  
-  d_lap <- dlaplace(x,mod_mz$mu, mod_mz$b)
-  
-  searchResultList <-  getNLMScore(searchResultList,mod_mz)
-  
-  if(!is.null(data_Y)){
-    rm(data_Y)
+  for(i in 1:length(adduct_masses)){
+    searchResultList <-  search_adduct(adduct_mass = adduct_masses[i],
+                                       adduct_name = adduct_names[i],
+                                       data_X = data_X, 
+                                       data_Y = data_Y, 
+                                       rt_tol = rt_tol, 
+                                       ppm_window = ppm_window
+    )
+    
+    # This step prepares to get a model developed
+    dM <- unlist(lapply(searchResultList, function(x) x$deltas$dM)) 
+    dM <- plyr::compact(dM)
+    
+    dM_ppm <- unlist(lapply(searchResultList, function(x) x$deltas$dM_ppm)) 
+    dM_ppm <- plyr::compact(dM_ppm)
+    
+    mod_mz <- laplace_unif_EM(dM_ppm,dM,instrument_tol = instrument_tol,boost=boost)
+    
+    x <- seq(-ppm_window,ppm_window,by=2*ppm_window/211)
+    
+    d_lap <- dlaplace(x,mod_mz$mu, mod_mz$b)
+    
+    searchResultList <-  getNLMScore(searchResultList,mod_mz)
+    
+    if(!is.null(data_Y)){
+      rm(data_Y)
+    }
+    searchResults[[i]] <- list("adduct" = adduct_list[i,],"results" = searchResultList,"model" = mod_mz)
   }
-  list("results" = searchResultList,"model" = mod_mz)
   
+  searchResults
   
 }
 
 
 
-#' Run NLM model on multiple samples
+#' Run NLM model 
 #'
-#' Wrapper function to run modelNLM for a list of samples.
+#' Wrapper function to run modelNLM
 #'
 #' @param msdial_results 
 #' @param instrument_tol 
 #' @param boost 
 #' @export
 #' @return
-modelNLM_run <- function(msdial_results, instrument_tol = 5,boost=0){
+modelNLM_run <- function(msdial_results,adduct_list,boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
   
-  #fh = paste(sample_names[i],"_model.tsv",sep="")
   for(i in 1: length(sample_names)){
     
-    modelNLM(msdial_results[[i]],instrument_tol = instrument_tol,boost=boost)
+    search_results <- modelNLM(msdial_results[[i]]$wsim,msdial_results[[i]]$nl,adduct_list = adduct_list, boost = boost,alpha_mz = alpha_mz,beta_rt = beta_rt, ppm_window = ppm_window, rt_tol = rt_tol, instrument_tol = instrument_tol)
     
   }
+  
+  search_results
   
 }
 
@@ -93,39 +101,30 @@ modelNLM_run <- function(msdial_results, instrument_tol = 5,boost=0){
 #' @param alpha_mz 
 #' @param beta_rt 
 #' @param instrument_tol 
-#' @param nCore 
 #' @return
 #' @export
-search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, data_Y, ppm_window = 30,rt_tol = 0.2, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = 10, nCore = 1){
-  options(warn = -1)
-  require(doParallel)
+search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, data_Y, ppm_window = 30,rt_tol = 0.2, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = .01){
   
-  if(nCore > 1){
-    cl <- parallel::makeCluster(nCore)
-    doParallel::registerDoParallel(cl)
-  }else{
-    registerDoSEQ()
-  }
+  options(warn = -1)
+  
+  
   
   cat(paste("Searching wSIM MS2 NL data for", adduct_name, "mass shift,", adduct_mass,"Da\n"))
   
   # exportList <- c("ppm_window","rt_tol","alpha_mz","beta_rt","instrument_tol")
-  searchResultList <- #list() 
-    
-    foreach(i = seq_len(nrow(data_X)), .packages = c("foreach","wSIMCity")) %dopar% {
-      
-      search_mass(data_X_row = data_X[i,],data_Y = data_Y,
-                  adduct_mass = adduct_mass,
-                  adduct_name = adduct_name,
-                  ppm_window = ppm_window,
-                  rt_tol=rt_tol,alpha_mz = alpha_mz,
-                  beta_rt = beta_rt, instrument_tol=instrument_tol)
-      
-    }
+  searchResultList <- vector(mode = "list", length = nrow(data_X)) 
   
-  if(nCore> 1){
-    stopCluster(cl)
+  #foreach(i = seq_len(nrow(data_X)), .packages = c("foreach","wSIMCity")) %dopar% {
+  for(i in 1:nrow(data_X)){  
+    searchResultList[[i]] = search_mass(data_X_row = data_X[i,],data_Y = data_Y,
+                                        adduct_mass = adduct_mass,
+                                        adduct_name = adduct_name,
+                                        ppm_window = ppm_window,
+                                        rt_tol=rt_tol,alpha_mz = alpha_mz,
+                                        beta_rt = beta_rt, instrument_tol=instrument_tol)
+    
   }
+  
   
   
   
@@ -150,7 +149,7 @@ search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, da
 #' @param instrument_tol the instrument tolerance window for the search score, usually 10ppm.
 #' @return list of search results.
 #' @export
-search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.0473, adduct_name = "dR",ppm_window = 30, rt_tol = 0.3, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = 10 ){
+search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.0473, adduct_name = "dR",ppm_window = 30, rt_tol = 0.3, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = .01 ){
   
   data_X_row <- as.data.frame(data_X_row)
   
@@ -161,7 +160,7 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
   mz_range <- getMassTolRange(data_X_row[,4]+adduct_mass,ppm_window)
   
   w <- which(data_Y[,4] > mz_range[1] & data_Y[,4] < mz_range[2] & data_Y[,3] > rt_range[1] & data_Y[,3] < rt_range[2])
-  #print(data_X_row)
+  
   search_result <- NULL
   
   if(length(w)>0){
@@ -180,9 +179,9 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
     
     deltas <- data.frame("dM" = dM, "dM_ppm" = dM_ppm, "dRT" = dRT)
     
-    score_mass <- similarityScore_laplace(dM_ppm,instrument_tol*2)
+    score_mass <- similarityScore_gauss(dM,instrument_tol)
     
-    score_rt <- similarityScore_laplace(dRT, rt_tol)   
+    score_rt <- similarityScore_gauss(dRT, rt_tol)   
     
     score_feature <- alpha_mz*score_mass + beta_rt * score_rt
     
@@ -200,7 +199,9 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
   }else{
     
     return(list("adduct_search_name" = adduct_name, "adduct_search_mass" = adduct_mass,"search"  = data_X_row,"results" = NULL, "deltas" = NULL,"ratios" = NULL,"scores"  = NULL ,"global_scores" = NULL ) )
+    
   }
+  
 }
 
 

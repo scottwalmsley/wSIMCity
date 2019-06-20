@@ -19,8 +19,10 @@
 #' laplace_unif_EM(dM)
 #'
 #'
-laplace_unif_EM = function(x, tol = 1e-5, maxiter = 1000,boost = 2,instrument_tol = 5) {
+laplace_unif_EM = function(x,dM,tol = 1e-5, maxiter = 1000,boost = 2,instrument_tol = .01) {
 
+  
+  
   weights= NULL
 
   ox = x
@@ -50,7 +52,8 @@ laplace_unif_EM = function(x, tol = 1e-5, maxiter = 1000,boost = 2,instrument_to
 
     dens_x = dlaplace(x, m, sqrt(new_b))
     if(boost > 0){
-      weights = weight_laplace(x,m,instrument_tol,boost)
+      #weights = weight_laplace(x,m,instrument_tol,boost)
+      weights = weight_gauss(dM,m,instrument_tol,boost)
       dens_x = dens_x * weights
     }
 
@@ -157,6 +160,21 @@ weight_laplace <- function(dM,mu,tol,boost){
 }
 
 
+
+#' Apply weights based on mass decimal
+#'
+#' @param dM 
+#' @param mu 
+#' @param tol 
+#' @param boost 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+weight_gauss <- function(dM,mu,tol,boost){
+  boost*exp(-0.5 * (abs(mu-dM)/tol)^2)
+}
 
 
 

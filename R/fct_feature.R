@@ -50,13 +50,13 @@ findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_pa
     
     msdial_file <- list.files(pattern = ".msdial",path = sub_analysis_path)
     
-   
     system2(command = "mv",args = c(paste(sub_analysis_path,"/",msdial_file,sep=""), paste(sample_directory,"/",msdial_file,sep=""))  )
     Sys.sleep(5)
   }
-  if(nCore > 1){
+  #if(nCore > 1){
     stopCluster(cl)
-  }
+  #}
+  
 }
 
 
