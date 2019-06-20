@@ -13,7 +13,7 @@
 #' @return
 #' @export
 #'
-modelNLM <- function(data_X,data_Y = NULL,sampleDir, adduct_list, boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
+modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
   
   
   PROTON = 1.007825032
@@ -21,11 +21,10 @@ modelNLM <- function(data_X,data_Y = NULL,sampleDir, adduct_list, boost = 2,alph
   print("Modelling data.....")
   
   adduct_masses <- adduct_list$MZ
-  adduct_names <- adduct_list$Neutral.Loss
+  adduct_names <- adduct_list$Neutral.Lossrt
   
   # Search the adduct - neutral loss pairs
-  
-  searchResults <- vector(mode = "list", length = length(adduct_masses))
+  #searchResults <- vector(mode = "list", length = length(adduct_masses))
   
   for(i in 1:length(adduct_masses)){
     searchResultList <-  search_adduct(adduct_mass = adduct_masses[i],
@@ -54,10 +53,15 @@ modelNLM <- function(data_X,data_Y = NULL,sampleDir, adduct_list, boost = 2,alph
     if(!is.null(data_Y)){
       rm(data_Y)
     }
-    searchResults[[i]] <- list("adduct" = adduct_list[i,],"results" = searchResultList,"model" = mod_mz)
+    searchResults <- list("adduct" = adduct_list[i,],"results" = searchResultList,"model" = mod_mz)
+    fh <-paste(sampleDir,"/",adduct_names[i],"_searchResults.rda",sep="")
+    save(file = fh,searchResults)
+    
+    fh <-paste(sampleDir,"/",adduct_names[i],"_searchResults.tsv",sep="")
+    write_NLM_results(searchResults$results,fh)
   }
   
-  searchResults
+  rm(list=ls())
   
 }
 
@@ -72,11 +76,11 @@ modelNLM <- function(data_X,data_Y = NULL,sampleDir, adduct_list, boost = 2,alph
 #' @param boost 
 #' @export
 #' @return
-modelNLM_run <- function(msdial_results,adduct_list,boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
+modelNLM_run <- function(msdial_results,sample_directories,adduct_list,boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
   
-  for(i in 1: length(sample_names)){
-    
-    search_results <- modelNLM(msdial_results[[i]]$wsim,msdial_results[[i]]$nl,adduct_list = adduct_list, boost = boost,alpha_mz = alpha_mz,beta_rt = beta_rt, ppm_window = ppm_window, rt_tol = rt_tol, instrument_tol = instrument_tol)
+  for(i in 1: length(sample_directories)){
+    sampleDir = sample_directories[i]
+    search_results <- modelNLM(sampleDir,msdial_results[[i]]$wsim,msdial_results[[i]]$nl,adduct_list = adduct_list, boost = boost,alpha_mz = alpha_mz,beta_rt = beta_rt, ppm_window = ppm_window, rt_tol = rt_tol, instrument_tol = instrument_tol)
     
   }
   
