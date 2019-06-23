@@ -21,7 +21,7 @@ modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alph
   print("Modelling data.....")
   
   adduct_masses <- adduct_list$MZ
-  adduct_names <- adduct_list$Neutral.Lossrt
+  adduct_names <- adduct_list$Neutral.Loss
   
   # Search the adduct - neutral loss pairs
   #searchResults <- vector(mode = "list", length = length(adduct_masses))
@@ -46,7 +46,7 @@ modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alph
     
     x <- seq(-ppm_window,ppm_window,by=2*ppm_window/211)
     
-    d_lap <- dlaplace(x,mod_mz$mu, mod_mz$b)
+    d_lap <- dlaplace(x,mod_mz$cr.ppm, mod_mz$b)
     
     searchResultList <-  getNLMScore(searchResultList,mod_mz)
     
@@ -61,7 +61,7 @@ modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alph
     write_NLM_results(searchResults$results,fh)
   }
   
-  rm(list=ls())
+  #rm(list=ls())
   
 }
 
@@ -224,7 +224,7 @@ getNLMScore <- function(searchResultList, mod_mz){
     
     search_result = searchResultList[[i]]
     if(!is.null(search_result$results)){
-      score <- dlaplace(X=search_result$deltas$dM_ppm, m = mod_mz$mu, b = mod_mz$b) / (mod_mz$unif)
+      score <- dlaplace(X=search_result$deltas$dM_ppm, m = mod_mz$cr.ppm, b = mod_mz$b) / (mod_mz$unif)
       
       score <- 2*log(score)
       

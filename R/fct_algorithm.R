@@ -20,57 +20,70 @@
 #'
 #'
 laplace_unif_EM = function(x,dM,tol = 1e-5, maxiter = 1000,boost = 2,instrument_tol = .01) {
-
+  
   
   
   weights= NULL
-
+  
   ox = x
   wo = seq(1,length(x)) # index the original data
   dens = density(x, bw = 0.001, n =2048)
   m = dens$x[dens$y == max(dens$y, na.rm=T)]
-
+  correction_ppm = m
+  
+  dens_dm = density(dM, bw = 0.001, n =2048)
+  m.d = dens_dm$x[dens_dm$y == max(dens_dm$y, na.rm=T)]
+  correction_dM = m.d
+  ## adjust the data to the mode
+  dM = dM - m.d
+  x = x - m
+  dens = density(x, bw = 0.001, n =2048)
+  m = dens$x[dens$y == max(dens$y, na.rm=T)]
+  
+  
+  
   #if(boost > 0){
   #  rn = rnorm(length(o.x)*boost, mean=m, sd = 1)
   #  x = c(o.x, rn)
-
+  
   #}
-
+  
   n = length(x)
-
+  
   b = 1  ## initial value
   z = rep(0.15, n)
   pi_match = 0.5
-
+  
   par_diff = 1e5
   iter = 0
-
+  
   ### mode m is fixed, just update the variance of laplace 2b^2
+  i = 0
   while ((iter < maxiter) & (abs(par_diff) > tol)) {
     new_v = sum(z * (x - m) ^ 2) / sum(z)
     new_b = sqrt(new_v / 2)
-
+    
     dens_x = dlaplace(x, m, sqrt(new_b))
     if(boost > 0){
       #weights = weight_laplace(x,m,instrument_tol,boost)
       weights = weight_gauss(dM,m,instrument_tol,boost)
       dens_x = dens_x * weights
     }
-
+    
     p1 = pi_match * dens_x #dlaplace(x, m, sqrt(new_b))
-
+    
     p2 = (1 - pi_match) * dunif(x, min(x) - 0.01, max(x) + 0.01)
     z = p1 / (p1 + p2)
     new_pi_match = mean(z)
-
+    
     par_diff = max(abs(c(new_pi_match - pi_match, new_b - b)))
     iter = iter + 1
     if (iter %% 10 == 0)
       cat(paste(iter,"\n"))
-
+    
     b = new_b
     pi_match = new_pi_match
-
+    i=i+1
   }
   cat("\n")
   o = order(ox)
@@ -78,9 +91,9 @@ laplace_unif_EM = function(x,dM,tol = 1e-5, maxiter = 1000,boost = 2,instrument_
   nz = z
   z = z[wo]
   z = z[o]
-
-
-  res = list(
+  
+  
+  res = list("cr.dM" =correction_dM, "cr.ppm" = correction_ppm,
     mu = m, b = b,o.x= ox,x= x, z=z ,weights = weights,n.z = nz,dens_x = dens_x, xmin = min(x) - 0.01, xmax = max(x) + 0.01, pos = pi_match,unif = mean(p2,na.rm =TRUE)
   )
   res

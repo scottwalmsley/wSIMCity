@@ -403,7 +403,7 @@ getPlots <- function(searchResultList,scandef_file,sampleDir,min_score = 0.95, m
 #'
 detectPeak <- function(XIC,rt){
   
-  n = spline(XIC[,1],XIC[,2])
+  n = spline(XIC[,2],XIC[,3])
   n$y[which(n$y<0)] = 0  
   
   #plot(n, type= "l", ylim = c(-30000,60000))
@@ -560,6 +560,7 @@ plotPeak <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,smooth = FALSE, sp = NULL, samp
   y2 = sp2$y
   
   cr = cor(y2,y1, method = "spearman")
+  
   
   text(min(pk_ms1$XIC$x )+rt_tol*0.1,max.int*0.8,
        paste("Area MS1: ",round(pk_ms1$area),"\n",
