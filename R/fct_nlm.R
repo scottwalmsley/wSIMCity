@@ -16,6 +16,7 @@
 modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
   
   
+  
   PROTON = 1.007825032
   
   print("Modelling data.....")
@@ -26,43 +27,56 @@ modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alph
   # Search the adduct - neutral loss pairs
   #searchResults <- vector(mode = "list", length = length(adduct_masses))
   
+  dM <- dM_ppm <- NULL
+  
+  searchResultList <- list()
   for(i in 1:length(adduct_masses)){
-    searchResultList <-  search_adduct(adduct_mass = adduct_masses[i],
-                                       adduct_name = adduct_names[i],
-                                       data_X = data_X, 
-                                       data_Y = data_Y, 
-                                       rt_tol = rt_tol, 
-                                       ppm_window = ppm_window
+    searchResultList[[i]] <-  search_adduct(adduct_mass = adduct_masses[i],
+                                            adduct_name = adduct_names[i],
+                                            data_X = data_X, 
+                                            data_Y = data_Y, 
+                                            rt_tol = rt_tol, 
+                                            ppm_window = ppm_window
     )
     
     # This step prepares to get a model developed
-    dM <- unlist(lapply(searchResultList, function(x) x$deltas$dM)) 
-    dM <- plyr::compact(dM)
+    dM_temp <- unlist(lapply(searchResultList[[i]], function(x) x$deltas$dM)) 
+    dM_temp <- plyr::compact(dM_temp)
+    dM = c(dM,dM_temp)
     
-    dM_ppm <- unlist(lapply(searchResultList, function(x) x$deltas$dM_ppm)) 
-    dM_ppm <- plyr::compact(dM_ppm)
+    dM_ppm_temp <- unlist(lapply(searchResultList[[i]], function(x) x$deltas$dM_ppm)) 
+    dM_ppm_temp <- plyr::compact(dM_ppm_temp)
+    dM_ppm = c(dM_ppm,dM_ppm_temp)
+  }
+  
+  
+  mod_mz <- laplace_unif_EM(dM_ppm,dM,instrument_tol = instrument_tol,boost=boost)
+  
+  x <- seq(-ppm_window,ppm_window,by=2*ppm_window/211)
+  
+  d_lap <- dlaplace(x,mod_mz$cr.ppm, mod_mz$b)
+  
+  
+  for(i in 1:length(adduct_masses)){
     
-    mod_mz <- laplace_unif_EM(dM_ppm,dM,instrument_tol = instrument_tol,boost=boost)
+    searchResultList[[i]] <-  getNLMScore(searchResultList[[i]],mod_mz)
     
-    x <- seq(-ppm_window,ppm_window,by=2*ppm_window/211)
+    scores <-  (lapply(searchResultList[[i]], function(x) x$scores$score_feature)) 
+    #scoreFeature <- plyr::compact(scoreFeature)
     
-    d_lap <- dlaplace(x,mod_mz$cr.ppm, mod_mz$b)
     
-    searchResultList <-  getNLMScore(searchResultList,mod_mz)
+    searchResults <- list("adduct" = adduct_list[i,], "dM" = dM, "dM_ppm" = dM_ppm, "model" = mod_mz, "scores" = scores)
     
-    if(!is.null(data_Y)){
-      rm(data_Y)
-    }
-    searchResults <- list("adduct" = adduct_list[i,],"results" = searchResultList,"model" = mod_mz)
     fh <-paste(sampleDir,"/",adduct_names[i],"_searchResults.rda",sep="")
     save(file = fh,searchResults)
     
     fh <-paste(sampleDir,"/",adduct_names[i],"_searchResults.tsv",sep="")
-    write_NLM_results(searchResults$results,fh)
+    write_NLM_results(searchResultList[[i]],fh)
+    
   }
   
-  #rm(list=ls())
   
+
 }
 
 
@@ -132,8 +146,7 @@ search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, da
   
   
   
-  rm(data_Y)
-  options(warn = -1)
+  options(warn = 0)
   return(plyr::compact(searchResultList))
   
 }
@@ -177,7 +190,7 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
     
     dRT <- data_Y[w,3] - data_X_row[,3]
     
-    rm(data_Y)
+    #rm(data_Y)
     
     ratios <- data.frame("ratio_area" = search_result[,6] / data_X_row[,6], "ratio_intensity" = search_result[,5] / data_X_row[,5])
     

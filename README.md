@@ -191,15 +191,16 @@ You provide these as input to the neutral loss modelling step: modelNLM(adduct_m
 
 msconvert_path <- "C:\\Program Files\\ProteoWizard\\ProteoWizard 3.0.18229.34f38e1eb\\msconvert.exe"
 
-results_dir <- "test/results"
-
-raw_file_dir <- "test/raw"
-
-scandef_file <- "test/scandef.txt"
-
 msdial_path <- "C:\\MSTOOLS\\MSDIALv3.66\\MsdialConsoleApp.exe"
 
-msdial_param_path <- "test\\msdial_param.txt"
+msdial_param_path <- "params\\msdial_param.txt"
+
+results_dir <- "results"
+
+raw_file_dir <- "raw"
+
+scandef_file <- "params/scandef.txt"
+
 
 ```
 
@@ -210,9 +211,9 @@ msdial_param_path <- "test\\msdial_param.txt"
 
 raw_file_list <- getRawFileList(raw_file_dir)
 
+raw_file_list
 
 sample_names <- getSampleNames(raw_file_dir)
-
 
 sample_names
 
@@ -223,12 +224,11 @@ sample_names
 ## prepare analysis results folders
 ```{r}
 
-dir.create(result_dir <- "test/results")
+dir.create(results_dir)
 
-makeSampleDir(result_dir,sample_names, scandef_file = "test/scandef.txt")
+makeSampleDir(results_dir,sample_names, scandef_file = scandef_file)
 
 sample_directories <- getSampleDirectories(results_dir)
-
 
 sample_directories
 
@@ -243,6 +243,7 @@ sample_directories
 ```{r}
 
 convertRaw(raw_file_dir = raw_file_dir, msconvert_path = msconvert_path)
+
 
 ```
 
@@ -261,7 +262,7 @@ segmentMzMLDataSample(raw_file_dir, sample_directories, scandef_file = scandef_f
 ## search mzml files with msdial
 ```{r}
 
-lapply(sample_directories, function(x) findPeaksMSDIAL(sample_directory = x,scandef_file = scandef_file, msdial_path, msdial_param_path,nCore=10))
+findPeaksMSDIALSample(sample_directories,scandef_file,msdial_path,msdial_param_path,nCore = 1)
 
 ```
 
@@ -269,7 +270,9 @@ lapply(sample_directories, function(x) findPeaksMSDIAL(sample_directory = x,scan
 ## Retrieve the MS-DIAL results
 ```{r}
 
-msdial_results <- lapply(sample_directories, function(x) getMSDIAL_results(x))
+msdial_results <- getMSDIAL_results(sample_directories)
+
+save(file = "msdial_results.rda",msdial_results)
 
 
 ```
@@ -278,46 +281,35 @@ msdial_results <- lapply(sample_directories, function(x) getMSDIAL_results(x))
 ## Now perform the search on each file
 A user friendly function to perform this loop will be available soon
 ```{r}
-for(i in 1:length(msdial_results)){
+sample_directories
 
- dset <- modelNLM(data_X = msdial_results[[i]][[1]]$wsim, 
- 								 data_Y = msdial_results[[i]][[1]]$wsim,
- 								 adduct_mass = -116.0474,
- 								 adduct_name = "isotope",
- 								 instrument_tol = 10,
- 								 boost = 3, 
- 								 nCore = 1)
 
-   fh = paste("dR_results_",sub(paste(results_dir,"/",sep=""),"",sample_directories[i]),".tsv", sep="")
-       write_NLM_results(dset$results, fh=fh)
+adduct_list <- data.frame("Neutral.Loss" = c("dR","13C_dR"),"MZ" = c(-116.0474,-121.0641))
 
-   mod = dset$model
-      fh = paste("model_",sub(paste(results_dir,"/",sep=""),"",sample_directories[i]),".rda", sep="")
-         save(file = fh, mod)
-         
-}
-```
+system.time({
+nlmMod <- modelNLM_run(msdial_results,
+											 sample_directories,
+											 adduct_list = adduct_list,
+											 boost = 3,
+											 alpha_mz = 0.5,
+											 beta_rt = 0.5,
+											 ppm_window = 30,
+											 rt_tol = 0.3,
+											 instrument_tol = .03)
+})
 
-## Extract your knowns
-```{r}
-getInternalStandards(msdial_results = msdial_results[[1]][[1]],search_tol = 20,rt_tol = 0.5,alpha_mz = 0.6,beta_rt = 0.4,out_file_name = "ctDNA1.csv")
+
 ```
 
 
-## Plot the best candidates
-This plots the best candidates for the chosen filter
+## Filter and merge the results accross adducts and look at your table of results. 
 ```{r}
 
-getPlots(searchResults[[1]],sampleDir = sample_directories[1],scandef_file = scandef_file,ppm = 6,min_score = 0.95,min_intensity = 5000,rt_tol = 1.5)
+
+merge_results(sample_directories, adduct_list)
 
 
 ```
-
-##  Coming soon:
-Details for using non wide-SIM data!   Check back in ~1day (6/7/2019)
-
-
-
 
 
 

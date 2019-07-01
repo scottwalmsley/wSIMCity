@@ -34,3 +34,101 @@ write_NLM_results = function(searchResultList,fh){
   write(file=fh,out_line)
 
 }
+
+
+
+#' Merge results of adducts
+#'
+#' @param sample_sirectories 
+#' @param score_feature 
+#' @param totalScore 
+#' @param maxRatio 
+#'
+# @return
+#' @export
+#'
+# @examples
+merge_results <- function(sample_directories, adduct_list,score_feature = 0.9, totalScore = 0.80, maxRatio = 5 ){
+  
+  
+  res <- lapply(sample_directories, function(x) merge_searchResults(x,adduct_list,score_feature, totalScore, maxRatio))
+  
+  
+}
+
+
+#' read_searchResultFile
+#'
+#' @param fh 
+#' @param score_feature 
+#' @param totalScore 
+#' @param maxRatio 
+#'
+#' @return
+#' @export
+#'
+# @examples
+read_searchResultFile <- function(fh,score_feature, totalScore, maxRatio){
+  
+  d <- read.delim(fh, header= TRUE)
+  ratio <- d$ratio_int
+  
+  w <- which(ratio < 1)
+  ratio[w] <- -1 * 1/ratio[w]
+  
+  d = d[which(abs(ratio) <  maxRatio)	,]
+  
+  w <- which(d$score_feature > score_feature & d$total_score > totalScore)
+  
+  d[w,]
+  
+}
+
+
+
+
+#' Merge serarch results by adducts
+#'
+#' @param sampleDir 
+#' @param adduct_list 
+#' @param score_feature 
+#' @param totalScore 
+#' @param maxRatio 
+#'
+#' @export
+#'
+merge_searchResults <- function( sampleDir , adduct_list, score_feature, totalScore, maxRatio){
+  
+  lf <- list.files(path=sampleDir, recursive = TRUE, full.names = TRUE, pattern = "searchResults.tsv")
+  
+  adductTypeFiles <- table(unlist(lapply(lf, function(x) { y = strsplit(x, split = "/")[[1]]; y[length(y)]})))
+  
+  dset <- NULL
+  
+  for(adduct in as.character(adduct_list$Neutral.Loss)){
+    
+    g <- grep(paste("/",adduct,sep=""), lf)
+    
+    d <- read_searchResultFile(lf[g],score_feature, totalScore, maxRatio)
+    d <- cbind("adduct" = rep(adduct,times = dim(d)[1]),d)
+    
+    dset <- rbind(dset,d)
+  }
+  
+  #sample_name <- 
+  s <- strsplit(split ="/",sampleDir)[[1]]
+  
+  dset <- dset[order(as.numeric(dset$PkIndex_MS1)),]
+  
+  fh <- paste(sampleDir,"/filtered_SearchResults_",s[length(s)],".csv",sep="")
+  write.csv(dset,file= fh)
+  
+  
+}
+
+
+
+
+
+
+
