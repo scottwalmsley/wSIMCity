@@ -279,7 +279,7 @@ save(file = "msdial_results.rda",msdial_results)
 
 
 ## Now perform the search on each file
-A user friendly function to perform this loop will be available soon
+
 ```{r}
 sample_directories
 
