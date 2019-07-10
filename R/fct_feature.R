@@ -45,7 +45,7 @@ findPeaksMSDIAL = function(sample_directory,scandef_file, msdial_path, msdial_pa
     
     print("Step away, have a coffee..... this is a resource hog!")
     
-    system2(command = msdial_path, args = c("lcmsdda", paste("-i ",sub_analysis_path,"/ ",sep=""),paste("-o",sub_analysis_path),paste("-m",msdial_param_path)))
+    system2(command = msdial_path, args = c("lcmsdda", paste("-i ",sub_analysis_path,"/ ",sep=""),paste("-o",sub_analysis_path),paste("-m",msdial_param_path),"-p"))
     Sys.sleep(5)
     
     msdial_file <- list.files(pattern = ".msdial",path = sub_analysis_path)

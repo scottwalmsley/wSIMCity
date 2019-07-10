@@ -281,12 +281,9 @@ save(file = "msdial_results.rda",msdial_results)
 ## Now perform the search on each file
 
 ```{r}
-sample_directories
-
 
 adduct_list <- data.frame("Neutral.Loss" = c("dR","13C_dR"),"MZ" = c(-116.0474,-121.0641))
 
-system.time({
 nlmMod <- modelNLM_run(msdial_results,
 											 sample_directories,
 											 adduct_list = adduct_list,
@@ -296,8 +293,6 @@ nlmMod <- modelNLM_run(msdial_results,
 											 ppm_window = 30,
 											 rt_tol = 0.3,
 											 instrument_tol = .03)
-})
-
 
 ```
 
@@ -310,6 +305,10 @@ merge_results(sample_directories, adduct_list)
 
 
 ```
+
+## Plot your data using the plotting module
+
+
 
 
 

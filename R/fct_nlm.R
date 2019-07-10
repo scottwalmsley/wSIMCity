@@ -75,6 +75,7 @@ modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alph
     
   }
   
+  rm(searchResultList)
   
 
 }
@@ -172,11 +173,11 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
   
   data_Y <- as.data.frame(data_Y)
   
-  rt_range <- c(data_X_row[3]-rt_tol,data_X_row[3]+rt_tol)
+  rt_range <- c(data_X_row[,5]-rt_tol,data_X_row[,5]+rt_tol)
   
-  mz_range <- getMassTolRange(data_X_row[,4]+adduct_mass,ppm_window)
+  mz_range <- getMassTolRange(data_X_row[,6]+adduct_mass,ppm_window)
   
-  w <- which(data_Y[,4] > mz_range[1] & data_Y[,4] < mz_range[2] & data_Y[,3] > rt_range[1] & data_Y[,3] < rt_range[2])
+  w <- which(data_Y[,6] > mz_range[1] & data_Y[,6] < mz_range[2] & data_Y[,5] > rt_range[1] & data_Y[,5] < rt_range[2] & data_Y[,3] == data_X_row[,3])
   
   search_result <- NULL
   
@@ -184,15 +185,15 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
     
     search_result <- data_Y[w,]
     
-    dM <- search_result[,4] - (data_X_row[,4] + adduct_mass)
+    dM <- search_result[,6] - (data_X_row[,6] + adduct_mass)
     
-    dM_ppm <- dM / (data_X_row[,4]-adduct_mass)*1e6
+    dM_ppm <- dM / (data_X_row[,6]-adduct_mass)*1e6
     
-    dRT <- data_Y[w,3] - data_X_row[,3]
+    dRT <- data_Y[w,5] - data_X_row[,5]
     
     #rm(data_Y)
     
-    ratios <- data.frame("ratio_area" = search_result[,6] / data_X_row[,6], "ratio_intensity" = search_result[,5] / data_X_row[,5])
+    ratios <- data.frame("ratio_area" = search_result[,8] / data_X_row[,8], "ratio_intensity" = search_result[,7] / data_X_row[,7])
     
     deltas <- data.frame("dM" = dM, "dM_ppm" = dM_ppm, "dRT" = dRT)
     
@@ -270,13 +271,15 @@ getNLMScore <- function(searchResultList, mod_mz){
       
       search <- search_result$search
       cln <- colnames(search)
-      cln[1] <- "MS1_idx"
-      cln[2] <- "MS1_rt"
-      cln[3] <- "MS1_mz"
-      cln[4] <- "MS1_intensity"
-      cln[5] <- "MS1_area"
-      cln[6] <- "MS1_ion_type"
-      cln[7] <- "MS1_isotope"
+      cln[1] <- "sample"
+      cln[2] <- "mass_range"
+      cln[3] <- "MS1_idx"
+      cln[4] <- "MS1_rt"
+      cln[5] <- "MS1_mz"
+      cln[6] <- "MS1_intensity"
+      cln[7] <- "MS1_area"
+      cln[8] <- "MS1_ion_type"
+      cln[9] <- "MS1_isotope"
       colnames(search) <- cln
       best_candidate <- cbind(search_result$results[wbc,],
                               search_result$ratios[wbc,],

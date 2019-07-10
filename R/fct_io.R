@@ -22,9 +22,9 @@ write_NLM_results = function(searchResultList,fh){
     
     #cat(paste(line),"\n")
     if(!is.null(search_result$results)){
-      line <- paste(as.character(c(search_result$search[c(1,3:6)],search_result$best_candidate[c(1,3:6,10:20)])),collapse = "\t")
+      line <- paste(as.character(c(search_result$search[c(1,5:8)],search_result$best_candidate[c(1,5:8,12:22)])),collapse = "\t")
     }else{
-      line <- paste(as.character(c(search_result$search[c(1,3:6)],rep("", times = 16))),collapse = "\t")
+      line <- paste(as.character(c(search_result$search[c(1,5:8)],rep("", times = 16))),collapse = "\t")
     }
     
     out_line = c(out_line,line)    
@@ -43,15 +43,15 @@ write_NLM_results = function(searchResultList,fh){
 #' @param score_feature 
 #' @param totalScore 
 #' @param maxRatio 
-#'
+#' @param minIntensity
 # @return
 #' @export
 #'
 # @examples
-merge_results <- function(sample_directories, adduct_list,score_feature = 0.9, totalScore = 0.80, maxRatio = 5 ){
+merge_results <- function(sample_directories, adduct_list,score_feature = 0.9, totalScore = 0.80, maxRatio = 5 , minIntensity = 3000){
   
   
-  res <- lapply(sample_directories, function(x) merge_searchResults(x,adduct_list,score_feature, totalScore, maxRatio))
+  res <- lapply(sample_directories, function(x) merge_searchResults(x,adduct_list,score_feature, totalScore, maxRatio, minIntensity))
   
   
 }
@@ -63,12 +63,12 @@ merge_results <- function(sample_directories, adduct_list,score_feature = 0.9, t
 #' @param score_feature 
 #' @param totalScore 
 #' @param maxRatio 
-#'
+#' @param minIntensity
 #' @return
 #' @export
 #'
 # @examples
-read_searchResultFile <- function(fh,score_feature, totalScore, maxRatio){
+read_searchResultFile <- function(fh,score_feature, totalScore, maxRatio, minIntensity){
   
   d <- read.delim(fh, header= TRUE)
   ratio <- d$ratio_int
@@ -78,7 +78,7 @@ read_searchResultFile <- function(fh,score_feature, totalScore, maxRatio){
   
   d = d[which(abs(ratio) <  maxRatio)	,]
   
-  w <- which(d$score_feature > score_feature & d$total_score > totalScore)
+  w <- which(d$score_feature > score_feature & d$total_score > totalScore & d$intensity_MS1 > minIntensity & d$intensity_MS2 >  minIntensity)
   
   d[w,]
   
@@ -94,24 +94,24 @@ read_searchResultFile <- function(fh,score_feature, totalScore, maxRatio){
 #' @param score_feature 
 #' @param totalScore 
 #' @param maxRatio 
-#'
+#' @param minIntensity
 #' @export
 #'
-merge_searchResults <- function( sampleDir , adduct_list, score_feature, totalScore, maxRatio){
+merge_searchResults <- function( sampleDir , adduct_list, score_feature, totalScore, maxRatio, minIntensity){
   
   lf <- list.files(path=sampleDir, recursive = TRUE, full.names = TRUE, pattern = "searchResults.tsv")
   
   adductTypeFiles <- table(unlist(lapply(lf, function(x) { y = strsplit(x, split = "/")[[1]]; y[length(y)]})))
   
   dset <- NULL
-  
+  i=1
   for(adduct in as.character(adduct_list$Neutral.Loss)){
     
     g <- grep(paste("/",adduct,sep=""), lf)
     
-    d <- read_searchResultFile(lf[g],score_feature, totalScore, maxRatio)
+    d <- read_searchResultFile(lf[g],score_feature, totalScore, maxRatio, minIntensity)
     d <- cbind("adduct" = rep(adduct,times = dim(d)[1]),d)
-    
+    d <- cbind("adduct_mass" = rep(adduct_list$MZ[i]),dpk)
     dset <- rbind(dset,d)
   }
   

@@ -18,38 +18,58 @@ msdial_data <- function(fh = NULL){
   require(data.table)
   
   cat(paste("   ...processing subfile:",fh,"\n"))
- 
+  
   d <- read.delim(fh, header= T)
-
+  
   mz <- d$Precursor.m.z
   rt <- d$RT.min.
-
+  
+  #print(mz[grep("304.1209",mz)])
   adduct <- d$AdductIon
   isotope <- d$Isotope
-
+  
   height <- d$Height
   area <- d$Area
-
+  
   rowID <- d$PeakID
-
+  
   name <- d$MetaboliteName
   comment <- d$Comment
-
-  dt <- data.table(peak_index = rowID,
-               
-               rt = rt,
-               mz = mz,
+  
+  smple = strsplit(fh,split="/")[[1]]
+  smple = smple[length(smple)]
+  smple = sub(".msdial","",smple)
+  smple = rep(smple,times= length(mz))
+  
+  
+  simWin <- getSIMWindows(scandef)
+  simWin <- paste(simWin$simStart,simWin$simEnd,sep="_")
+  
+  winStart<- unlist(lapply(smple, function(x) strsplit(split = "_",x)[[1]][2]))
+  winEnd<- unlist(lapply(smple, function(x) strsplit(split = "_",x)[[1]][3]))
+  simWin = paste(winStart,winEnd,sep="_")
+  
+  
+  dt <- data.table(sample = smple,
+                   mass_range = simWin,
+                   peak_index = rowID,
                    
-               intensity = height,
-               area = area,
-             
-               adduct_type = adduct,
-               isotope = isotope,
-               
-               comment = comment
-             
-            )
-
+                   rt = rt,
+                   mz = mz,
+                   
+                   intensity = height,
+                   area = area,
+                   
+                   adduct_type = adduct,
+                   isotope = isotope,
+                   
+                   comment = comment
+                   
+  )
+  
+  
+  
+  
   dt
 }
 

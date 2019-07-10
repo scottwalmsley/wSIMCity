@@ -227,12 +227,11 @@ score_feature  =  function(dM,aM,tolM,drt,aR,tolR){
 #'
 #' @return numeric vector containing minimum and maximum data values
 #' @export
-#'
+#' 
 #' @examples
 getMassTolRange <- function(m,ppm){
   
   dM <- ppm*m/1e6
-  
   return(c(m-dM,m+dM))
 
 }
