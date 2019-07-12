@@ -50,9 +50,7 @@ write_NLM_results = function(searchResultList,fh){
 # @examples
 merge_results <- function(sample_directories, adduct_list,score_feature = 0.9, totalScore = 0.80, maxRatio = 5 , minIntensity = 3000){
   
-  
   res <- lapply(sample_directories, function(x) merge_searchResults(x,adduct_list,score_feature, totalScore, maxRatio, minIntensity))
-  
   
 }
 
@@ -98,31 +96,38 @@ read_searchResultFile <- function(fh,score_feature, totalScore, maxRatio, minInt
 #' @export
 #'
 merge_searchResults <- function( sampleDir , adduct_list, score_feature, totalScore, maxRatio, minIntensity){
-  
+  cat(paste("Merging adduct search results in sample directory: ", sampleDir,"\n"))
   lf <- list.files(path=sampleDir, recursive = TRUE, full.names = TRUE, pattern = "searchResults.tsv")
   
   adductTypeFiles <- table(unlist(lapply(lf, function(x) { y = strsplit(x, split = "/")[[1]]; y[length(y)]})))
   
   dset <- NULL
+  
   i=1
+  
   for(adduct in as.character(adduct_list$Neutral.Loss)){
     
     g <- grep(paste("/",adduct,sep=""), lf)
     
     d <- read_searchResultFile(lf[g],score_feature, totalScore, maxRatio, minIntensity)
+    
     d <- cbind("adduct" = rep(adduct,times = dim(d)[1]),d)
-    d <- cbind("adduct_mass" = rep(adduct_list$MZ[i]),dpk)
+    
+    d <- cbind("adduct_mass" = rep(adduct_list$MZ[i],times = dim(d)[1]),d)
+    
     dset <- rbind(dset,d)
+    i=i+1
+    
   }
   
-  #sample_name <- 
+   
   s <- strsplit(split ="/",sampleDir)[[1]]
   
   dset <- dset[order(as.numeric(dset$PkIndex_MS1)),]
   
   fh <- paste(sampleDir,"/filtered_SearchResults_",s[length(s)],".csv",sep="")
-  write.csv(dset,file= fh)
   
+  write.csv(dset,file= fh)
   
 }
 

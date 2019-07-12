@@ -15,7 +15,7 @@
 #'
 #'
 getXIC <- function(spectra,header,mz,ppm=NULL,mzdec=NULL, rt,rt_tol,rt_offset = NULL, smooth = TRUE,sp = NULL){
-  
+  set.seed(123456)
   ## Filter scans by RT store for extraction of mz (likely more efficient)
   
   rtRange <- getRTRangeByRT(rt*60,rt_tol*60)   #+/- 1.5 min, mzR reads in seconds
@@ -111,9 +111,9 @@ getRawXIC <- function(spectra,header,mz,ppm=NULL,mzdec=NULL, rtmin,rtmax,smooth 
   subsetOfSpectra <- spectra[w]
   
   rtVals <- header$retentionTime[w]
- 
+  
   ## Now extract the range of needed mz and intensities
-    if(!is.null(ppm)){
+  if(!is.null(ppm)){
     mzRange  <- getMassTolRange(mz,ppm)  # I like 6-7ppm in hi res orbitrap data that I'm working with
   }
   if(!is.null(mzdec)){
@@ -694,8 +694,8 @@ plotRAWPeak <- function(ms1_mz,ms2_mz,ppm,rtmin,rtmax,smooth = FALSE, sp = NULL,
 #' @return dataframe
 #' @export
 #'
-getPeaks = function(ms1_XIC,ms2_XIC,adduct_mass,rt,sp = 0.3, plot = TRUE){
-  
+getPeaks = function(ms1_XIC,ms2_XIC,adduct_mass,rt,sp = 0.4, plot = TRUE, filename = NULL){
+  set.seed(123456)
   if(colSums(ms1_XIC)[3]==0 | colSums(ms2_XIC)[3] == 0 ){
     return(NULL)
   }
@@ -704,9 +704,15 @@ getPeaks = function(ms1_XIC,ms2_XIC,adduct_mass,rt,sp = 0.3, plot = TRUE){
   pk_ms1 <- detectPeakAtRT(ms1_XIC,rt)
   pk_ms2 <- detectPeakAtRT(ms2_XIC,rt)
   
-  # not used yet
+  # 
   pkl_1 <- dim(pk_ms1$peak)[1]
   pkl_2 <- dim(pk_ms2$peak)[1]
+  if(is.null(pkl_1 ) | is.null(pkl_2)){
+    return(NULL)
+  }
+  
+  
+  
   
   # not used yet
   mx1 <- which(pk_ms1$peak[,3] == pk_ms1$max.intensity)
@@ -719,16 +725,6 @@ getPeaks = function(ms1_XIC,ms2_XIC,adduct_mass,rt,sp = 0.3, plot = TRUE){
   # for plotting
   max.int <- max(pk_ms1$max.intensity,pk_ms2$max.intensity)
   par(mar = c(4,4,1,1))
-  
-  if(plot){
-    main = paste()
-    plot(pk_ms1$XIC, type="l", col=4, lwd=2, ylim = c(0,max.int*1.21), bty="n",main = main,
-         xlab = expression(paste(italic("t")["R"]," (min)")), ylab = "", las= 1)
-    lines(pk_ms2$XIC, type="l", col=2, lwd=2)
-    
-    lines(pk_ms1$peak[,2:3],type="h", col=rgb(0.1,0.1,0.8,0.2),lwd=3)
-    lines(pk_ms2$peak[,2:3],type="h", col=rgb(0.8,0.1,0.1,0.2),lwd=3)
-  }
   
   # Compute the correlations using trc:: package!
   options(warn = -1)
@@ -753,18 +749,53 @@ getPeaks = function(ms1_XIC,ms2_XIC,adduct_mass,rt,sp = 0.3, plot = TRUE){
   # recompute the ratio
   new_ratio = pk_ms2$max.intensity/pk_ms1$max.intensity
   
-  if(plot){
-    text(min(pk_ms1$XIC$x ),max.int*0.9,
-         paste("mz (wsim,nl): ",round(mean(pk_ms1$peak[,1]),4),", ",round(mean(pk_ms2$peak[,1]),4),"\n",
-               "deltas (ppm,rt): ",round(dM_ppm,2),", ",round(dRT,2),"\n", 
-               "Areas: ",round(pk_ms1$area),", ",round(pk_ms2$area),"\n",
-               "Ratios (area,int): ", round(pk_ms2$area/pk_ms1$area,2),", ",round(pk_ms2$max.intensity/pk_ms1$max.intensity,2),"\n",
-               "Cor (rho): ",round(trc_pk[1],2),"\n",
-               "Scores (feat,final): ",round(score,3),", ",round(score * trc_pk[1],3),
-               sep="")
-         ,cex = 0.75,pos= 4)
-  }
+  if(!is.na(trc_pk[1])){
+    if(plot==TRUE & score > 0.8 & new_ratio > 0.1 & new_ratio < 10 & trc_pk[1] > 0.8){
+      
+      svg(filename = filename)
+      
+      plot(pk_ms1$XIC, type="l", col=4, lwd=2, ylim = c(0,max.int*1.21), bty="n",
+           xlab = expression(paste(italic("t")["R"]," (min)")), ylab = "", las= 1)
+      lines(pk_ms2$XIC, type="l", col=2, lwd=2)
+      
+      lines(pk_ms1$peak[,2:3],type="h", col=rgb(0.1,0.1,0.8,0.2),lwd=3)
+      lines(pk_ms2$peak[,2:3],type="h", col=rgb(0.8,0.1,0.1,0.2),lwd=3)
+      
+      
+      text(min(pk_ms1$XIC$x ),max.int*0.9,
+           paste("mz (wsim,nl): ",round(mean(pk_ms1$peak[,1]),4),", ",round(mean(pk_ms2$peak[,1]),4),"\n",
+                 "deltas (ppm,rt): ",round(dM_ppm,2),", ",round(dRT,2),"\n", 
+                 "Areas: ",round(pk_ms1$area),", ",round(pk_ms2$area),"\n",
+                 "Ratios (area,int): ", round(pk_ms2$area/pk_ms1$area,2),", ",round(pk_ms2$max.intensity/pk_ms1$max.intensity,2),"\n",
+                 "Cor (rho): ",round(trc_pk[1],2),"\n",
+                 "Scores (feat,final): ",round(score,3),", ",round(score * trc_pk[1],3),
+                 sep="")
+           ,cex = 0.75,pos= 4)
+      
+      dev.off()
+      
+      png(filename = sub(".svg",".png",filename))
+      
+      plot(pk_ms1$XIC, type="l", col=4, lwd=2, ylim = c(0,max.int*1.21), bty="n",
+           xlab = expression(paste(italic("t")["R"]," (min)")), ylab = "", las= 1)
+      lines(pk_ms2$XIC, type="l", col=2, lwd=2)
+      
+      lines(pk_ms1$peak[,2:3],type="h", col=rgb(0.1,0.1,0.8,0.2),lwd=3)
+      lines(pk_ms2$peak[,2:3],type="h", col=rgb(0.8,0.1,0.1,0.2),lwd=3)
+      text(min(pk_ms1$XIC$x ),max.int*0.9,
+           paste("mz (wsim,nl): ",round(mean(pk_ms1$peak[,1]),4),", ",round(mean(pk_ms2$peak[,1]),4),"\n",
+                 "deltas (ppm,rt): ",round(dM_ppm,2),", ",round(dRT,2),"\n", 
+                 "Areas: ",round(pk_ms1$area),", ",round(pk_ms2$area),"\n",
+                 "Ratios (area,int): ", round(pk_ms2$area/pk_ms1$area,2),", ",round(pk_ms2$max.intensity/pk_ms1$max.intensity,2),"\n",
+                 "Cor (rho): ",round(trc_pk[1],2),"\n",
+                 "Scores (feat,final): ",round(score,3),", ",round(score * trc_pk[1],3),
+                 sep="")
+           ,cex = 0.75,pos= 4)
+      dev.off()
+      
+    }
   
+  }
   data.frame("ms1_intensity" = pk_ms1$max.intensity, 
              "ms2_intensity" = pk_ms2$max.intensity, 
              "ms1.mz" = mean(pk_ms1$peak[,1]),
@@ -789,19 +820,28 @@ getPeaks = function(ms1_XIC,ms2_XIC,adduct_mass,rt,sp = 0.3, plot = TRUE){
 #' @return list of dataframes containing the correlation and scores for precursor NL pairs.
 #' @export
 #'
-getXIC_cor <- function(sampleDir, scandef_file){
+getXIC_cor <- function(sampleDir, scandef_file, plot = TRUE){
   
+  options(warn = -1)
+  
+  cmd <- paste("del ",sampleDir,"/plots/*", sep = "")
+  
+  system(cmd)
+  
+  cat(paste("Processing", sampleDir,"\n"))
+  
+  set.seed(123456)
   
   # read the search results to obtain the list of precursor ions.
   # for your case, you can alternative ly read the csv file  you produce and then obtain the mz and rt values.
-  lf <- list.files(path = sampleDir, pattern = "SearchResults.csv", recursive = TRUE, full.names = TRUE)
+  lf <- list.files(path = sampleDir, pattern = "filtered_SearchResults", recursive = TRUE, full.names = TRUE)
   
   
   d = read.csv(file = lf[1], header=T, row.names = 1)
   d <- d[order(d$mz_MS1),]
   
   # I have a minimum filter in place.
-  d<- d[which(d$mz_MS1>330),]
+  d<- d[which(d$mz_MS1>330 &  d$mz_MS1 < 634),]
   
   
   # The scan file is a necessary evil to get around lack of header info.  
@@ -820,8 +860,8 @@ getXIC_cor <- function(sampleDir, scandef_file){
   lf = list.files(path = sampleDir, pattern = "mzML", recursive = TRUE, full.names = TRUE)
   
   # mzML files are segregated into ms1 and ms2 data. In the case of your 0-25 method, this works for those scan types as well.
-  lf_1 = grep("WSIM",lf)
-  lf_2 = grep("NL",lf)
+  lf_1 = grep("/WSIM",lf)
+  lf_2 = grep("/NL",lf)
   
   # open the file connections and pre-load them into memory for later access.
   raw_ms1 <- lapply(lf[lf_1],function(x) mzR::openMSfile(x))
@@ -835,7 +875,7 @@ getXIC_cor <- function(sampleDir, scandef_file){
     
     w = which( win_min < mz & win_max > mz)
     file_idx <- c(file_idx,w[1])
-    cat(paste(w,win_min[w[1]],win_max[w[1]]),mz,"\n")
+    #cat(paste(w,win_min[w[1]],win_max[w[1]]),mz,"\n")
   }
   
   
@@ -856,22 +896,17 @@ getXIC_cor <- function(sampleDir, scandef_file){
     # w_idx: which file to open
     w_idx <- which(file_idx == idx)
     
-    # probably not needed in your case, you can pass the adduct mass to this function from your workflow.
-    adduct <- as.character(d$adduct[w_idx])
-    for(u in unique(adduct)){
-      w <- which(adduct_list$Neutral.Loss == u)
-      adduct_mass[which(adduct == u)] = adduct_list$MZ[w]
-    }
     
     # Subset the data from the original data file.
     ms1_RT <- d$RT_MS1[w_idx]
     ms1_mz <- d$mz_MS1[w_idx]
     ms2_mz <- d$mz_MS2[w_idx]
     ratio <- d$ratio_int[w_idx]
-    
+    adduct <- as.character(d$adduct[w_idx])
+    adduct_mass <- d$adduct_mass[w_idx]
     
     # Hard code this at ~0.3, seems to avoid false negatives. 
-    sp = 0.3
+    sp = 0.4
     
     # extract ms1 data for all the peaks in the list indexed to the mzml files.
     raw_XIC_ms1 = lapply(1:length(w_idx), function(x) wSIMCity::getRawXIC(spectra = spectra_ms1,
@@ -897,14 +932,29 @@ getXIC_cor <- function(sampleDir, scandef_file){
     # detect the peaks in the data and then return the list of dataframe data
     for( k in (1:length(w_idx))){
       
+      if(plot){
+        filename <- paste(sampleDir,"/plots/",adduct[k],"_", round(ms1_mz[k],4),"@",round(ms1_RT[k],3),".svg",sep="") 
+      }
+      #cat(paste("idx:",idx,"k:",k,ms1_mz[k],adduct_mass[k]),"\n")
       corr[[k]] =   
-        getPeaks(	raw_XIC_ms1[[k]],raw_XIC_ms2[[k]],adduct_mass[k] ,rt = ms1_RT[k], plot = TRUE)
+        getPeaks(	raw_XIC_ms1[[k]],raw_XIC_ms2[[k]],adduct_mass[k] ,rt = ms1_RT[k], plot = plot,file =  filename)
       
     }
     
     
     
   }
+  outfile = NULL
+  for(l in corr){
+    if(!is.null(l)){
+      outfile <- rbind(outfile,l)
+    }
+  }
+  
+  
+  fh <- paste(sampleDir,"/finalSearchResults.csv",sep="")
+  write.csv(file = fh,outfile)
+  options(warn = 0)
   corr
 }
 
@@ -919,7 +969,7 @@ getXIC_cor <- function(sampleDir, scandef_file){
 #' @export
 #'
 detectPeakAtRT <- function(XIC,rt){
-  
+  set.seed(123456)
   # The smoother
   n = spline(XIC[,2],XIC[,3])
   n$y[which(n$y<0)] = 0  
@@ -930,16 +980,18 @@ detectPeakAtRT <- function(XIC,rt){
   
   
   #Temp function to aid background subtractions, will migrate from pracma package later.
-  pv = quantmod::findValleys(n$y)-1
+  #pv = quantmod::findValleys(n$y)-1
   
   # Background subtraction
-  bk = spline(n$x[pv],n$y[pv], n = length(n$x),xmin = min(n$x), xmax = max(n$x))
-  n$y = n$y-bk$y
-  n$y[which(n$y<0)] = 0  
+  #bk = spline(n$x[pv],n$y[pv], n = length(n$x),xmin = min(n$x), xmax = max(n$x))
+  #n$y = n$y-bk$y
+  #n$y[which(n$y<0)] = 0  
   
   
   # Peak selection and boundary recognition
   pk = pracma::findpeaks(n$y,threshold = 500)
+  if(is.null(pk))
+    return(NULL)
   
   
   # Select the peak at the indicated RT determined using the feature finding software.
@@ -950,8 +1002,14 @@ detectPeakAtRT <- function(XIC,rt){
   pk_start = pk[which(pk[,2]==pk_idx),3]
   pk_end = pk[which(pk[,2]==pk_idx),4]
   
+  #cat(paste(rt,pk_idx,pk_start,pk_end,"\n"))
   # 3col matrix: mz, rt, intensity  
+  
+  
   pk <- as.matrix(cbind(nmz$y[pk_start:pk_end],n$x[pk_start:pk_end],n$y[pk_start:pk_end]))
+  
+  
+  
   
   # max intensityu
   max.int <- pk[which.max(pk[,3]),3]
@@ -963,7 +1021,7 @@ detectPeakAtRT <- function(XIC,rt){
                "rt_start"= n$x[pk_start],
                "rt_end" = n$x[pk_end],
                "peak" = pk)
-
+  
   
   if(length(peaks) ==0)
     return(NULL)

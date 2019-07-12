@@ -76,7 +76,7 @@ modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alph
   }
   
   rm(searchResultList)
-  
+  gc()
 
 }
 
