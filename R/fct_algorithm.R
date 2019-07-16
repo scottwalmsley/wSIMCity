@@ -184,7 +184,9 @@ weight_laplace <- function(dM,mu,tol,boost){
 #' @return vector of weights
 #' @export
 #'
-# @examples
+#' @examples
+#' weight_gauss(0.1,0.01,5,2)
+#' 1.99967
 weight_gauss <- function(dM,mu,tol,boost){
   boost*exp(-0.5 * (abs(mu-dM)/tol)^2)
 }

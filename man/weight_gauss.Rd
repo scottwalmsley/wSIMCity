@@ -21,3 +21,7 @@ vector of weights
 \description{
 Apply weights based on mass decimal
 }
+\examples{
+weight_gauss(0.1,0.01,5,2)
+1.99967
+}
