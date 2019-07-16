@@ -2,9 +2,9 @@
 #' 
 #' Returns a list of .raw files.
 #'
-#' @param raw_file_dir 
+#' @param character vector raw_file_dir 
 #'
-#' @return
+#' @return vector of raw file names
 #' @export
 #'
 getRawFileList <- function(raw_file_dir){
@@ -40,13 +40,12 @@ getSampleNames <- function(raw_file_dir){
 #' Make directories for each sample
 #'
 #' Creates directories for sample of interest indicateg in the global options parameter file.
-#'
+#' @param result_dir character vector pointing to the results directory
+#' @param sample_names vector of sample names
+#' @param scandef_file character vector of path to scandef file
 #'
 #' @export
 #'
-#' @examples
-#'
-#' #makeSampleDir()
 makeSampleDir <-function(result_dir,sample_names, scandef_file){
   
   
@@ -78,7 +77,7 @@ makeSampleDir <-function(result_dir,sample_names, scandef_file){
 #' makeSIMDir creates sim directories for performing independent  MSDIAL results files.
 #'
 #' @param scandef_file a non empty character vector giving the wide SIM scan definition file.
-#' @param out_dir a non empty character vector giving the location used to write results.
+#' @param out_path a non empty character vector giving the location used to write results.
 #'
 #'
 #' @export
@@ -107,8 +106,8 @@ makeSIMDir <- function(scandef_file, out_path){
 #' Get sample directories
 #'
 #' @param results_path character vector indicating the directory in which to search.
-#'
-#' @return
+#' @return vector of sample directories
+#' 
 #' @export
 #'
 getSampleDirectories <- function(results_path){
@@ -123,6 +122,8 @@ getSampleDirectories <- function(results_path){
 #' convertRaw converts vendor raw data using msconvert into an mzML file. This mzML file is then used by segmentmzML data to segment the file into SIM m/z ranges.
 #'
 #' @export
+#' @param raw_file_dir relative path to the raw files
+#' @param msconvert_path full path to msconvert
 #'
 #' @examples
 #' #convertRaw()
@@ -148,13 +149,16 @@ convertRaw <- function(raw_file_dir, msconvert_path ){
 #'
 #' Segregates mzml file into separate mzml files defined by mslevel and sim window.
 #'
+#' @param raw_file_directory relative path to the raw files
+#' @param sample_directories vector of sample directories
+#' @param scandef_file a non empty character vector giving the wide SIM scan definition file.
 #'
 #' @export
 #'
 #' @examples
 #' #segmentMzMLDataSample
 #'
-segmentMzMLDataSample <- function(raw_file_directory, sample_directories, scandef_file = scandef_file){
+segmentMzMLDataSample <- function(raw_file_directory, sample_directories, scandef_file){
   
   mzml_files <- list.files(pattern = "mzML",path = raw_file_dir, full.names = TRUE)
   i=1
@@ -170,16 +174,15 @@ segmentMzMLDataSample <- function(raw_file_directory, sample_directories, scande
 
 #' segmentMzMlData
 #'
-#' @param mzFile The input mzml file
-#' 
 #' @param sample_directory_path The path to your outputdata.  The folder must be preexisting.
-#'
+#' @param single_mzml_file path to a single mzML file
+#' @param scandef_file path to the scan definition file.
 #'
 #' @export
 #'
 #' @examples
 #' #segmentMZMLData("test.mzML", out_path = "results/")
-segmentMzMLData <- function(single_mzml_file,sample_directory_path, scandef_file = scandef_file){
+segmentMzMLData <- function(single_mzml_file,sample_directory_path, scandef_file){
 
   cat(paste("Opening file:",single_mzml_file,"\n"))
 

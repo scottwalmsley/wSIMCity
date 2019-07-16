@@ -13,7 +13,7 @@
 #' ppmErr(490.1944,490.1946)
 #'  -0.4080012
 ppmErr <- function(m, m0) {
-    .Call(`_wSIMCity_ppmErr`, m, m0)
+    .Call('_wSIMCity_ppmErr', PACKAGE = 'wSIMCity', m, m0)
 }
 
 #' @name getMassTolRange
@@ -28,7 +28,7 @@ ppmErr <- function(m, m0) {
 #' getMassTolRange(m = 490.1946,ppm = 5)
 #' 490.1921 490.1971
 getMassTolRange <- function(m, ppm) {
-    .Call(`_wSIMCity_getMassTolRange`, m, ppm)
+    .Call('_wSIMCity_getMassTolRange', PACKAGE = 'wSIMCity', m, ppm)
 }
 
 #' @name dlaplace
@@ -45,7 +45,7 @@ getMassTolRange <- function(m, ppm) {
 #' d_lap <- dlaplace(x,m=0,b = 1)
 #' plot(x,d_lap, type = "l")
 dlaplace <- function(X, m, b) {
-    .Call(`_wSIMCity_dlaplace`, X, m, b)
+    .Call('_wSIMCity_dlaplace', PACKAGE = 'wSIMCity', X, m, b)
 }
 
 #' @name weight_laplace
@@ -64,21 +64,21 @@ dlaplace <- function(X, m, b) {
 #' @examples 
 #' weight_laplace(dM,mu=0.1, tol = 5, boost = 2)
 weight_laplace <- function(dM, mu, tol, boost) {
-    .Call(`_wSIMCity_weight_laplace`, dM, mu, tol, boost)
+    .Call('_wSIMCity_weight_laplace', PACKAGE = 'wSIMCity', dM, mu, tol, boost)
 }
 
 #' @export
 load_msdial_results <- function(df) {
-    .Call(`_wSIMCity_load_msdial_results`, df)
+    .Call('_wSIMCity_load_msdial_results', PACKAGE = 'wSIMCity', df)
 }
 
 #' @export
 read_MSDIAL_file <- function(fh) {
-    .Call(`_wSIMCity_read_MSDIAL_file`, fh)
+    .Call('_wSIMCity_read_MSDIAL_file', PACKAGE = 'wSIMCity', fh)
 }
 
 #' @export
 read_list_MSDIAL_files <- function(sample_file_list) {
-    .Call(`_wSIMCity_read_list_MSDIAL_files`, sample_file_list)
+    .Call('_wSIMCity_read_list_MSDIAL_files', PACKAGE = 'wSIMCity', sample_file_list)
 }
 

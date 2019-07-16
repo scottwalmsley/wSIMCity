@@ -307,7 +307,7 @@ plotKnowns <- function(scandef_file, sampleDir,ppm = 6, rt_tol = 1.5){
 #' Get the list of sim windows
 #' 
 #' Retrieves the scan windows for plotting functions.
-#' @param scandef
+#' @param scandef data.frame containing the SIM windows
 #' @return a character vector of scan windows
 #' @export 
 #'
@@ -324,10 +324,10 @@ getSIMWindows = function(scandef){
 
 #' getRTRangebyRT
 #'
-#' @param RT 
-#' @param tol 
+#' @param RT numeric retention time
+#' @param tol numeric tolerance
 #'
-#' @return
+#' @return vector containing limits of RT range
 #' @export
 #'
 #' 
@@ -349,7 +349,7 @@ getRTRangeByRT <-function(RT,tol){
 #'
 #' @export
 #'
-#' @examples
+##@examples
 getPlots <- function(searchResultList,scandef_file,sampleDir,min_score = 0.95, min_intensity = 1000, ppm = 6,rt_tol = 1.5 , min_ratio = 10){
   
   require(mzR)
@@ -602,8 +602,7 @@ plotPeak <- function(ms1_mz,ms2_mz,ppm,rt,rt_tol,smooth = FALSE, sp = NULL, samp
 #' @param sp 
 #' @param sampleDir 
 #' @param file 
-#'
-#' @return
+#' 
 #' @export
 #'
 # @examples

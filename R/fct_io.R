@@ -37,13 +37,13 @@ write_NLM_results = function(searchResultList,fh){
 
 
 
-#' Merge results of adducts
+#' Merge MSDIal results 
 #'
-#' @param sample_sirectories 
-#' @param score_feature 
-#' @param totalScore 
-#' @param maxRatio 
-#' @param minIntensity
+#' @param sample_directories vector of sample directory paths
+#' @param score_feature minimum score
+#' @param totalScore minimum total score
+#' @param maxRatio maximum ratio
+#' @param minIntensity minimum intensity
 # @return
 #' @export
 #'
@@ -56,13 +56,15 @@ merge_results <- function(sample_directories, adduct_list,score_feature = 0.9, t
 
 
 #' read_searchResultFile
+#' 
+#' Reads an msdial search result file
 #'
-#' @param fh 
-#' @param score_feature 
-#' @param totalScore 
-#' @param maxRatio 
-#' @param minIntensity
-#' @return
+#' @param fh character vector file path
+#' @param score_feature numeric minimum score feature
+#' @param totalScore numeric minimum total score
+#' @param maxRatio numeric max ratio
+#' @param minIntensity numeric minimum intensity
+#' @return data.frame
 #' @export
 #'
 # @examples
@@ -85,14 +87,16 @@ read_searchResultFile <- function(fh,score_feature, totalScore, maxRatio, minInt
 
 
 
-#' Merge serarch results by adducts
+#' Merge search results by adducts
+#' 
+#' Merges search results from the NLM search
 #'
-#' @param sampleDir 
-#' @param adduct_list 
-#' @param score_feature 
-#' @param totalScore 
-#' @param maxRatio 
-#' @param minIntensity
+#' @param sampleDir character vector path to the sample directory
+#' @param adduct_list data.frame of adducts
+#' @param score_feature numeric minimmum score feature
+#' @param totalScore numeric mumimum total score
+#' @param maxRatio numeric maximum ratio
+#' @param minIntensity numeric minimum ratio
 #' @export
 #'
 merge_searchResults <- function( sampleDir , adduct_list, score_feature, totalScore, maxRatio, minIntensity){

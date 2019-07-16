@@ -10,15 +10,15 @@
 #' @param maxiter maximum number of iterations.
 #' @param boost A weight value applied to Laplace distribution.
 #' @param instrument.tol numeric value assigned to
-#'
+#' @param x 
+#' @param dM 
+#' @param tol 
+#' @param maxiter 
+#' @param boost 
+#' @param instrument_tol 
+#' 
 #' @return list of data model
 #' @export
-#'
-#' @examples
-#'
-#' laplace_unif_EM(dM)
-#'
-#'
 laplace_unif_EM = function(x,dM,tol = 1e-5, maxiter = 1000,boost = 2,instrument_tol = .01) {
   
   
@@ -176,15 +176,15 @@ weight_laplace <- function(dM,mu,tol,boost){
 
 #' Apply weights based on mass decimal
 #'
-#' @param dM 
-#' @param mu 
-#' @param tol 
-#' @param boost 
+#' @param dM numeric delta mass
+#' @param mu numeric mean
+#' @param tol numeric tolerance
+#' @param boost numeric integer value to boost signal
 #'
-#' @return
+#' @return vector of weights
 #' @export
 #'
-#' @examples
+# @examples
 weight_gauss <- function(dM,mu,tol,boost){
   boost*exp(-0.5 * (abs(mu-dM)/tol)^2)
 }
@@ -206,7 +206,6 @@ weight_gauss <- function(dM,mu,tol,boost){
 #' @export
 #'
 #' @examples
-#'
 #' score_feature(dM = 1.2,aM = 0.5,tolM = 5, drt = 0.2, aR = 0.5, tolR = 0.3)
 #' 0.7936826
 #'
@@ -228,7 +227,7 @@ score_feature  =  function(dM,aM,tolM,drt,aR,tolR){
 #' @return numeric vector containing minimum and maximum data values
 #' @export
 #' 
-#' @examples
+# @examples
 getMassTolRange <- function(m,ppm){
   
   dM <- ppm*m/1e6

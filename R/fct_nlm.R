@@ -1,7 +1,8 @@
 
 #' modelNLM
 #'
-#'
+#' @param sampleDir the path to the sample to by analyzed
+#' @param adduct_list data.frame of adducts
 #' @param data_X data frame of MS1 features and associated data.
 #' @param data_Y data frame of MS1 or MS2 and associated data.
 #' @param boost numeric value indicating the boost factor for the weigths to be applied to the dM values (default = 3).
@@ -10,7 +11,9 @@
 #' @param alpha_mz numeric value, 0-1 to weight the mz search score.
 #' @param beta_rt numeric value, 0-1 to weight the rt search score. Alpha and beta must add up to 1.
 #' @param instrument_tol the instrument tolerance window for the search score, usually 10ppm.
-#' @return
+#'
+
+#' 
 #' @export
 #'
 modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
@@ -90,7 +93,7 @@ modelNLM <- function(sampleDir,data_X,data_Y = NULL, adduct_list, boost = 2,alph
 #' @param instrument_tol 
 #' @param boost 
 #' @export
-#' @return
+#' @return list containing search results
 modelNLM_run <- function(msdial_results,sample_directories,adduct_list,boost = 2,alpha_mz = 0.5,beta_rt = 0.5, ppm_window = 30, rt_tol = 0.2, instrument_tol = .01){
   
   for(i in 1: length(sample_directories)){
@@ -120,7 +123,7 @@ modelNLM_run <- function(msdial_results,sample_directories,adduct_list,boost = 2
 #' @param alpha_mz 
 #' @param beta_rt 
 #' @param instrument_tol 
-#' @return
+#' @return data.frame of search results
 #' @export
 search_adduct <- function(adduct_mass = -116.0473,adduct_name = "dR", data_X, data_Y, ppm_window = 30,rt_tol = 0.2, alpha_mz = 0.5, beta_rt = 0.5, instrument_tol = .01){
   
@@ -230,7 +233,7 @@ search_mass  <- function(data_X_row = NULL, data_Y = NULL,adduct_mass = -116.047
 #'
 #' @param searchResultList 
 #' @param mod_mz 
-#' @return
+#' @return list of search result data frames
 #' @export
 getNLMScore <- function(searchResultList, mod_mz){
   
