@@ -642,7 +642,7 @@ plotRAWPeak <- function(ms1_mz,ms2_mz,ppm,rtmin,rtmax,smooth = FALSE, sp = NULL,
   ms1_XIC <- getRAWXIC(spectra = ms1_spectra,
                        header = ms1_header,
                        mz = ms1_mz,ppm=ppm,rtmin=rtmin,rtmax=rtmax, smooth = smooth, sp = sp)
-  ms2_XIC <- getXIC(spectra= ms2_spectra,
+  ms2_XIC <- getRAWXIC(spectra= ms2_spectra,
                     header = ms2_header,
                     mz = ms2_mz,ppm=ppm,rtmin=rtmin,rtmax=rtmax, smooth = smooth, sp = sp)  
   
