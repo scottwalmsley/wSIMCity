@@ -1,24 +1,17 @@
 Package: wSIMCity
-Type: Package
-Title: Data mining neutral losses in DIA SIM (boxcar) data.
-Version: 0.13
-Date: 2019-04-19
-Author: Scott Walmsley
+Version: 0.1.0
+Title: Searching wide SIM - wide-MS2 data (DIA) for neutral losses
+Author: Scott Walmsley <swalmsle@umn.edu>
 Maintainer: Scott Walmsley <swalmsle@umn.edu>
-Description: software for mining wide-selected ion monitoring/MS2 (Wide-SIM/MS2) mass spectrometry 
- data. wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center and the Institute for Health Informatics at the University of Minnesota. 
- Wide-SIM/MS2 is a data-independent acquisition (DIA) strategy adopted from the SWATH methodology to monitor the neutral loss of 2′-deoxyribose (dR) from
- modified 2′-deoxyribonucleosides for DNA adductomic analysis (reference). wSIMCity was developed to overcome data structure issues in Wide-SIM/MS2 data which 
- limited the usefulness of existing software solutions and provides for the automated detection of DNA adducts. The workflow uses R-packages to process Wide-SIM/MS2
- raw data and to mine potential DNA adducts retrospectively. This algorithm can also be applied to detect classes of compounds that share common neutral losses under 
- CID fragmentation.
-License: Apache 2.0
-Imports: Rcpp (>= 1.0.1),
-        mzR,
-        doParallel,
-        foreach,
-        pracma,
-        data.table
-LinkingTo: Rcpp
-RoxygenNote: 6.1.1
+Description: Detection of netural losses in wide SIM DIA data.
+Depends: R (>= 3.5)
+Imports: mzR, RSQLite, Rdisop, dplyr, ggplot2, viridis, hrbrthemes,
+        plotly, htmlwidgets, withr, DT
+License: file LICENSE
+LazyData: true
 Encoding: UTF-8
+VignetteBuilder: knitr
+Suggests: BiocStyle, knitr, rmarkdown
+RoxygenNote: 7.1.0
+NeedsCompilation: no
+Packaged: 2020-07-24 10:50:02 UTC; walmsles
