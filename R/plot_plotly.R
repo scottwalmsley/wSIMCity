@@ -3,6 +3,8 @@
 
 
 plot_density <- function(){
+   
+   
    requireNamespace('plotly')
    
    
@@ -58,8 +60,11 @@ plot_mz_histogram <- function(){
 #'
 get_hit_table <- function(){
    
+   requireNamespace('plotly')
+   
    con <- RSQLite::dbConnect(RSQLite::SQLite(),db_name)
    dat <- 	RSQLite::dbGetQuery(con, paste("SELECT * FROM identified_known_adducts"))
+   
    RSQLite::dbDisconnect(con)
    
    

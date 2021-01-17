@@ -78,11 +78,14 @@ plotPeak = function(spectrum, mz, ppm, main = NULL,col = 1){
 #' @param ppm tolerance window in ppm
 #' @param main character vector for the plot title
 #' @param col integer color value
-#' @param titl character the title of the plot
+#' @param title character the title of the plot
+#' @param bw bandwidth for plotting smoothed peaks, default = .35
 #' @export
 #'
-plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL){
+plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL, bw = 0.35){
    
+   requireNamespace('plotly')
+   requireNamespace('DT')
    
    pk0 = getPeak(spectrum,mz,ppm)
    pk0 = data.frame(x = pk0$x, y = pk0$y)
@@ -169,6 +172,7 @@ plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL)
    
    #title = title
    ##########################
+   m <- list( l = 50, r = 50, b = 100, t = 100, pad = 4 )
    fig = fig %>% plotly::layout(
       title = list(text = title,font = list(family = 'Times New Roman', size = 12, color = "#7f7f7f")),
       xaxis = list(range = list(mz- 0.25, mz + 2.5),title = "m/z",font = list(family ='Times New Roman', size = 7, color = "#7f7f7f")),

@@ -21,7 +21,7 @@ plot_dna_adduct_map <- function(knowns = F){
       
    }else{
       
-      d <- 	RSQLite::dbGetQuery(con, "SELECT * FROM certified_hits where (n_pk > 3 AND ABS(ratio) < 2.3 AND score_total > 0.8 AND rho > 0.8) OR ID like '%d%'" )# AND ion_type_ms1 like '%0%'")
+      d <- 	RSQLite::dbGetQuery(con, "SELECT * FROM hit_table where (n_pk > 3 AND ABS(ratio) < 2.3 AND score_total > 0.8 AND rho > 0.8) OR ID like '%d%'" )# AND ion_type_ms1 like '%0%'")
    }
    
    RSQLite::dbDisconnect(con)
@@ -48,7 +48,7 @@ plot_dna_adduct_map <- function(knowns = F){
                        stringsAsFactors = F
       )
    }else{
-      dat = data.frame('idx' = d$pk_idx,
+      dat = data.frame('idx' = d$pk_group,
                        'ppm' = d$ppm,
                        'rt'=d$rt_ms1,
                        'mz'=d$mz_ms1,
@@ -81,7 +81,7 @@ plot_dna_adduct_map <- function(knowns = F){
          '<extra></extra> '),
       marker = list(opacity = ~0.2, sizemode = 'diameter',  size = ~log(int))#,sizeref = sizeref)
    )
-   print(fig  %>% layout(showlegend = FALSE))
+   print(fig)
    
    
    

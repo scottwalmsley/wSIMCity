@@ -17,7 +17,8 @@ search_NLM(
   rt_tol = 9,
   mzmin = 135,
   mzmax = 634,
-  mzwid = 0.01
+  mzwid = 0.01,
+  plot = F
 )
 }
 \arguments{
@@ -46,6 +47,8 @@ search_NLM(
 \item{mzmax}{the maximum mz, default = 634}
 
 \item{mzwid}{the mz slice size, default = 0.01 for Orbitrap}
+
+\item{plot}{plot diagnostic plots}
 }
 \description{
 search_NLM Wrappper function to search for the neutral loss in wide SIM DIA data.

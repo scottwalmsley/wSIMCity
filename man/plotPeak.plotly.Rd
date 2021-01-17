@@ -4,7 +4,15 @@
 \alias{plotPeak.plotly}
 \title{Plots the spectrum of precursor and aglycones using plotly}
 \usage{
-plotPeak.plotly(spectrum, mz, ppm, main = NULL, col = 1, title = NULL)
+plotPeak.plotly(
+  spectrum,
+  mz,
+  ppm,
+  main = NULL,
+  col = 1,
+  title = NULL,
+  bw = 0.35
+)
 }
 \arguments{
 \item{spectrum}{matrix of mz and intensities}
@@ -17,7 +25,9 @@ plotPeak.plotly(spectrum, mz, ppm, main = NULL, col = 1, title = NULL)
 
 \item{col}{integer color value}
 
-\item{titl}{character the title of the plot}
+\item{title}{character the title of the plot}
+
+\item{bw}{bandwidth for plotting smoothed peaks, default = .35}
 }
 \description{
 Plots the spectrum of precursor and aglycones using plotly

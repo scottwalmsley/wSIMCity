@@ -4,7 +4,7 @@
 #'
 assign_isotopes = function(){
 
-
+   
 
    con <- RSQLite::dbConnect(RSQLite::SQLite(),db_name)
    dat <- 	RSQLite::dbGetQuery(con, "SELECT * FROM peak_group_data")

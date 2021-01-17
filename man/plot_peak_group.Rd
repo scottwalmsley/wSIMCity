@@ -9,7 +9,7 @@ plot_peak_group(pk_group = NULL, mz = NULL, bw = 0.35)
 \arguments{
 \item{pk_group}{numeric index}
 
-\item{mz}{mn null}
+\item{mz}{mz null}
 
 \item{bw}{bandwidth}
 }

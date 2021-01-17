@@ -1,7 +1,7 @@
 #' plot peaks that are DNA adducts.
 #'
 #' @param pk_group numeric index
-#' @param mz mn null
+#' @param mz mz null
 #' @param bw bandwidth
 #'
 #' @export
@@ -128,6 +128,7 @@ plot_peak_group <- function(pk_group = NULL,mz = NULL, bw = 0.35){
        xend = ~x,
       yend = ~yp,
       data = dat,
+      line = list(color = 'rgb(22, 96, 167)'),
       inherit=T
       )
    fig2 <-   plotly::add_segments(
@@ -138,6 +139,7 @@ plot_peak_group <- function(pk_group = NULL,mz = NULL, bw = 0.35){
       xend = ~x,
       yend = ~-1*yb,
       data = dat,
+      line = list(color = 'rgb(205, 12, 24)'),
       inherit=T
    )
    
@@ -155,13 +157,21 @@ plot_peak_group <- function(pk_group = NULL,mz = NULL, bw = 0.35){
    wmx = which.max((  lapply(spectra[e$scan], function(x) getPeak(x,mz,7)$y)))
    
    spectrum = spectra[[e$scan[wmx]]]
+   
    fig3 = plotPeak.plotly(spectrum, mz,7,col=4, title = 'MS1 isotopes')
-   #fig3
+   
+   ax = list(title = 'm/z')
+   
+   fig3 <- fig3 %>% layout( xaxis = ax)
+   fig3
+   
    
    mz = e2$mz_ms2
    wmx = which.max((  lapply(spectra[e$scan], function(x) getPeak(x,mz,7)$y)))
    
    fig4 = plotPeak.plotly(spectrum, mz,7,col=4, title = 'MS2 isotopes')
+   
+   
    #fig4
    sfig = plotly::subplot(fig, fig2,fig3,fig4,nrows = 2)
    sfig = sfig %>% plotly::layout(title = tt,

@@ -4,6 +4,10 @@
 #'
 compute_group_data <- function(){
    
+   # db_name
+   
+   
+   
    con <- RSQLite::dbConnect(RSQLite::SQLite(),db_name)
    dat <- 	RSQLite::dbGetQuery(con, "SELECT * FROM assigned_peak_groups")
    RSQLite::dbDisconnect(con)
@@ -100,8 +104,6 @@ compute_group_data <- function(){
          
          fwhm2[i] = sm.pk$fwhm
          
-         
-         
          #ion_type.ms2[i] = sub$ion_type_ms2[w]
          #isotope_ratio.ms2[i] = sub$isotope_ratio_ms2[w]
          
@@ -109,6 +111,7 @@ compute_group_data <- function(){
          n.pk[i] = length(which(dat$pk_group == g))
          
          corr[i] = round(cor(sub$p_int , sub$nl_int),2)
+         
          score.mz[i] = round( similarityScore_gauss(sub$dM[w],0.005), 2)
          score.rt[i] = round( similarityScore_gauss(mx.rt.ms1[i] - mx.rt.ms2[i],0.2), 2)
          

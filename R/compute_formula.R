@@ -243,31 +243,31 @@ getValid <- function(flist, DBE =4, precursor = T){
 }
 
 
-#' Numeric values for nucleotides
-#'
-#' @return
-#'
-formulaNucleotide <- function(){
+## Numeric values for nucleotides
+##
+## @return
+##
+#formulaNucleotide <- function(){
 
 
-   cytosine = c('C' = 9, 'H' = 13, 'N' = 3, 'O' = 4, 'DBE' = 5 )
+#   cytosine = c('C' = 9, 'H' = 13, 'N' = 3, 'O' = 4, 'DBE' = 5 )
 
-   thymine  = c('C' = 10, 'H' = 14, 'N' = 2, 'O' = 5, 'DBE' = 5)
+#   thymine  = c('C' = 10, 'H' = 14, 'N' = 2, 'O' = 5, 'DBE' = 5)
 
-   guanine  = c('C' = 10, 'H' = 13, 'N' = 5, 'O' = 4, 'DBE' = 7)
+#   guanine  = c('C' = 10, 'H' = 13, 'N' = 5, 'O' = 4, 'DBE' = 7)
 
-   adenine  = c('C' = 10, 'H' = 13, 'N' = 5, 'O' = 3, 'DBE' = 7)
+#   adenine  = c('C' = 10, 'H' = 13, 'N' = 5, 'O' = 3, 'DBE' = 7)
 
 
-   a_cytosine = c('C' = 4, 'H' = 5, 'N' = 3, 'O' = 1, 'DBE' = 4 )
+#   a_cytosine = c('C' = 4, 'H' = 5, 'N' = 3, 'O' = 1, 'DBE' = 4 )
 
-   a_thymine  = c('C' = 5, 'H' = 6, 'N' = 2, 'O' = 2,'DBE' = 4 )
+#   a_thymine  = c('C' = 5, 'H' = 6, 'N' = 2, 'O' = 2,'DBE' = 4 )
 
-   a_guanine  = c('C' = 5, 'H' = 5, 'N' = 5, 'O' = 1,'DBE' = 6 )
+#   a_guanine  = c('C' = 5, 'H' = 5, 'N' = 5, 'O' = 1,'DBE' = 6 )
 
-   a_adenine  = c('C' = 5, 'H' = 5, 'N' = 5, 'O' = 0,'DBE' = 6 )
+#   a_adenine  = c('C' = 5, 'H' = 5, 'N' = 5, 'O' = 0,'DBE' = 6 )
 
-}
+#}
 
 
 

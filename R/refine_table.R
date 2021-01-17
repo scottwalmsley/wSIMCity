@@ -1,4 +1,4 @@
-#' Rine table and remove duplicates
+#' Refine table and remove duplicates
 #'
 #' @param merged_table the original master table
 #' @param ppm the mz tolerance window in ppm

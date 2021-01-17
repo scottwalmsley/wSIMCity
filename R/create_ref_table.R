@@ -20,7 +20,7 @@ create_ref_table = function(table_name,db.list, ppm, rt_tol){
 
       con <- RSQLite::dbConnect(RSQLite::SQLite(),db )
 
-      dat[[i]] <- RSQLite::dbGetQuery(con,  'SELECT * from certified_hits') #
+      dat[[i]] <- RSQLite::dbGetQuery(con,  'SELECT * from hit_table') #
 
       RSQLite::dbDisconnect(con)
 

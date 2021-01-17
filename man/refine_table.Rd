@@ -2,7 +2,7 @@
 % Please edit documentation in R/refine_table.R
 \name{refine_table}
 \alias{refine_table}
-\title{Rine table and remove duplicates}
+\title{Refine table and remove duplicates}
 \usage{
 refine_table(merged_table, ppm = 10, rt_tol = 1.5)
 }
@@ -17,5 +17,5 @@ refine_table(merged_table, ppm = 10, rt_tol = 1.5)
 data frame of the refined merged table
 }
 \description{
-Rine table and remove duplicates
+Refine table and remove duplicates
 }

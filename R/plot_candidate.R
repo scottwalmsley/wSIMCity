@@ -16,7 +16,7 @@ plot_candidate <- function(ppm = 7){
    for(i in 1:nrow(dat)){
 
       con <- RSQLite::dbConnect(RSQLite::SQLite(),db_name)
-      query = paste("SELECT * from assigned_peak_groups WHERE pk_group =",dat$pk_idx[i])
+      query = paste("SELECT * from assigned_peak_groups WHERE pk_group =",dat$pk_group[i])
       e <- 	RSQLite::dbGetQuery(con, query)
       RSQLite::dbDisconnect(con)
 
