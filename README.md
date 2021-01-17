@@ -2,7 +2,55 @@
 
 </br>
 
-## Table of Contents  
+
+## Quick Start:
+
+1. Install using Rstudio or similar.  Dependencies are in the DESCRIPTION file: mzR, RSQLite, Rdisop, dplyr, ggplot2, viridis, hrbrthemes, plotly, htmlwidgets, withr, DT
+
+
+2. Create a project folder and place your mzML files there.
+
+3. Convert your wide SIM / MS2 data using proteowizard. Centroid data ONLY and use ```--simAsSpectra ``` flag!:
+```
+'msconvert --filter 'peakPicking true 1-'  --simAsSpectra --mzML *.raw
+```
+
+4. List your raw files and your mzML files:
+
+```{r}
+raw_files <- list.files(pattern  = "raw", full.names = T)
+
+input_file <- sub(".raw",".mzML",raw_files)
+
+input_file
+
+```
+
+
+5. Run your search:
+
+```{r}
+
+lapply(input_file, function(x) search_NLM(file = x,   
+                                          delta_search_mass = -116.0473, # the signed (-/+) neutral loss for deoxy ribose
+                                          search_name = 'dR', # tag for the name of the search
+                                          mzmin = 135, # absolute minimum mz
+                                          mzmax = 634, # absolute maximum mz value
+                                          mzwid = 0.01, # mz bin size for feature finding
+                                          ppm_tol = 20, # ppm tolerance for the dR neutral loss search
+                                          rt_tol = 12, # retention time tolerance in seconds for searching the NL masses
+                                          plot = F # plot DNA adduct maps and data tables in html format.
+))
+
+```
+
+6. Results are located in an SQLite file named using your <filename> with a timestamp attached to it.
+
+7. Each mzML file has a results folder with plots and the sql table.
+
+You can view your results using DB Browser. Simply open your sqlite file and browse to the hit_table data table for results.   Alternatively, view your results by clicking on the html file in the sample results folder. Diagnotic plots will open when the peak group is clicked on. 
+
+
 
 
 [Background](#background)
@@ -11,22 +59,10 @@
 
 [Scoring](#scoring)
 
-[Getting started](#getstart)
-
-[Installation](#installation)</br>
-
-[Dependencies](#dependencies)</br>
-
-[Before you start](#beforestart)</br>
-
-[Usage](#usage)</br>
 
 </br></br>
 
 ## Background
-
-
-
 
 Welcome to wSIMCity, a software for mining wide-selected ion monitoring/MS2 (Wide-SIM/MS<sup>2</sup>) mass spectrometry data. wSIMCity was developed by Scott Walmsley, PhD, of the Masonic Cancer Center and the Institute for Health Informatics at the University of Minnesota. Wide-SIM/MS<sup>2</sup> is a data-independent acquisition (DIA) strategy adopted from the SWATH methodology to monitor the neutral loss of 2′-deoxyribose (dR) from modified 2′-deoxyribonucleosides for DNA adductomic analysis (reference). wSIMCity was developed to overcome data structure issues in Wide-SIM/MS2 data which limited the usefulness of existing software solutions and provides for the automated detection of DNA adducts. The workflow uses R-packages to process Wide-SIM/MS<sup>2</sup> raw data and to mine potential DNA adducts retrospectively. This algorithm can also be applied to detect classes of compounds that share common neutral losses under CID fragmentation. 
 </br></br>
@@ -99,43 +135,10 @@ From these results, a list of candidate ions are produced and then re-extracted 
 
 
 
-## Getting started
-
-<a name="installation"/>
-
-## 1. Installation
-Start by downloading and installing the source R package. Don't forget to set your .libPaths() environment if needed:
-```{r}
-
-.libPaths("path to R library folder")
-
-```
-To finish installation, we strongly suggest downloading the repository as a zip package.   Then open the R package using R-studio.   Then use the install button in RStudio to complete the installation into your R library.
 
 
-## 2. Dependencies
-
-#### Operating system:
-
-Please note that due to the fact that software for acquiring and processing the mass spectrometry data used in this workflow was developed for Windows operating systems.   While some functions can be adapted to run on other operating systems, the very fact that Windows is used to run the mass spectrometers, to convert raw data to mzML,  and to process data into feature lists means you will likely need to run this workflow using a Windows computer.</br>
-
-The R dependencies are:
-
-#### R packages:
-
-1. mzR : for reading mzML raw data
-2. Rcpp : for mzR
-</br></br>
-
-#### Windows compatible software:
-
-1. The proteowizard msconvert software: for converting Thermo .Raw files (or any other supported vendor) to mzML format.
-
-### 3. Before you start<a name="beforestart"/>:
-
-#### These include:
 The software will produce a scan definition file automatically by reading the mass ranges from the filter list in the mzML file.
-#### 1. A scan definition file.  
+#### Scan definition file.  
 
 This file describes one duty cycle on the instrument in DIA SIM mode and defines what the *m/z* ranges for the wide SIM-MS<sup>2</sup> are.  It is tab delimited and is in the form:
 
@@ -167,9 +170,6 @@ This file describes one duty cycle on the instrument in DIA SIM mode and defines
 ```ScanType``` is one of either 'WSIM' or 'NL' used to denote the scan level (MS<sup>1</sup> or MS<sup>2</sup>).</br>
 ```WindowStart``` and ```WindowEnd``` indicate the start and end *m/z* values for the data collection *m/z* range as set at the instrument.</br>
 ```AquisitionStart``` and ```AqcuisitionEnd``` denote the start and end *m/z* values for the mass range you filtered your data on during the run.
-
-
-### Processing workflow:
 
 
 
