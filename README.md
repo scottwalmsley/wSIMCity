@@ -12,7 +12,7 @@
 
 3. Convert your wide SIM / MS2 data using proteowizard. Centroid data ONLY and use ```--simAsSpectra ``` flag!:
 ```
-'msconvert --filter 'peakPicking true 1-'  --simAsSpectra --mzML *.raw
+msconvert --filter 'peakPicking true 1-'  --simAsSpectra --mzML *.raw
 ```
 
 4. List your raw files and your mzML files:
