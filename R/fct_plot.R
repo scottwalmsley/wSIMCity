@@ -115,7 +115,7 @@ plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL,
       yend = ~y,
       data = spectrum.df,
       inherit=T,
-      line = list( shape = 'spline', smoothing = bw,color = 'rgb(10, 10, 10)', width = 1, opacity = 0.95)
+      line = list( shape = 'spline', smoothing = bw,color = 'rgb(10, 10, 10)', width = 1, opacity = 0.5)
    )
    
    
@@ -128,7 +128,7 @@ plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL,
       yend = ~y,
       data = pk0,
       inherit=T,
-      line = list( shape = 'spline', smoothing = bw,color = 'rgb(256, 10, 10)',  opacity = 0.75, width = 2)
+      line = list( shape = 'spline', smoothing = bw,color = col,  opacity = 0.5, width = 4)
    )
 
    
@@ -147,7 +147,7 @@ plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL,
             yend = ~y,
             data = pk1,
             inherit=T,
-            line = list( shape = 'spline', smoothing = bw,color = 'rgb(256, 10, 10)',  opacity = 0.5, width = 3)
+            line = list( shape = 'spline', smoothing = bw,color = col,  opacity = 0.5, width = 4)
          )
          
          if(!is.na(pk2$y)){
@@ -163,7 +163,7 @@ plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL,
                   yend = ~y,
                   data = pk2,
                   inherit=T,
-                  line = list( shape = 'spline', smoothing = bw,color = 'rgb(256, 10, 10)',  opacity = 0.5, width = 3)
+                  line = list( shape = 'spline', smoothing = bw,color = col,  opacity = 0.5, width = 4)
                )
             }
          }
@@ -173,6 +173,7 @@ plotPeak.plotly = function(spectrum, mz, ppm, main = NULL,col = 1, title = NULL,
    #title = title
    ##########################
    m <- list( l = 50, r = 50, b = 100, t = 100, pad = 4 )
+  
    fig = fig %>% plotly::layout(
       title = list(text = title,font = list(family = 'Times New Roman', size = 12, color = "#7f7f7f")),
       xaxis = list(range = list(mz- 0.25, mz + 2.5),title = "m/z",font = list(family ='Times New Roman', size = 7, color = "#7f7f7f")),

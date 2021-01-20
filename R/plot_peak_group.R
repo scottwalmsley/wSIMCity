@@ -80,12 +80,13 @@ plot_peak_group <- function(pk_group = NULL,mz = NULL, bw = 0.35){
    m <- list(
       l = 100,
       r = 100,
-      b = 10,
+      b = 50,
       t = 80,
-      pad =4
+      pad =0
    )
    
-   mzr = wSIMCity::getMassTolRange(e2$mz_ms1+1.003355,15)
+   mzr = wSIMCity::getMassTolRange(e2$mz_ms1,15)
+   #mzr = wSIMCity::getMassTolRange(e2$mz_ms1+1.003355,15)
 #e$rt_min[ which(e$mz > mzr[1] & e$mz < mzr[2])]# & e$rt_min > (e2$rt_ms1 - 0.5) & e$rt_min < (e2$rt_ms1+0.5))]
    #M0 peaks
    fig = plotly::plot_ly(dat, 
@@ -111,26 +112,39 @@ plot_peak_group <- function(pk_group = NULL,mz = NULL, bw = 0.35){
       showlegend = FALSE, margin = m)
    #fig
    
+   
+   
+   #############################################
+   ##### Fig 2 raw sticks - peaks
+   minx = min(dat$x)
+   maxx = max(dat$x)
+   
    fig2 = plotly::plotly_empty(dat, 
                          x = ~x, 
                          y = ~yp, 
-                         #xaxis = list(range = c(400,500)),
+                         #xaxis = list(range = c(minx,maxx)),
                          type = 'scatter', 
                          mode = 'none')#, 
                          #name = 'precursor')#,
                          #line = list( shape = 'spline', smoothing = bw,color = 'rgb(22, 96, 167)', width = 2)) 
+   #fig2
    
    fig2 <-   plotly::add_segments(
        #Line Vertical
        fig2,
        x = ~x,
        y = ~rep(0,times = length(x)),
+       
        xend = ~x,
-      yend = ~yp,
-      data = dat,
-      line = list(color = 'rgb(22, 96, 167)'),
-      inherit=T
+       yend = ~yp,
+       
+       data = dat,
+       
+       line = list(color = 'rgb(22, 96, 167)'),
+
+       inherit=T
       )
+   
    fig2 <-   plotly::add_segments(
       #Line Vertical
       fig2,
@@ -143,40 +157,67 @@ plot_peak_group <- function(pk_group = NULL,mz = NULL, bw = 0.35){
       inherit=T
    )
    
-   fig2 = fig2 %>% plotly::layout(
-      title = list(text = 'MS scans detected',font = list(family = 'Times New Roman', size = 12, color = "#7f7f7f")),
-      xaxis = list(title = "rt (min)",font = list(family ='Times New Roman', size = 7, color = "#7f7f7f")),
-      yaxis = list(title = "Intensity",font = list(family ='Times New Roman', size = 7, color = "#7f7f7f"),exponentformat = "e"),
-      showlegend = FALSE, margin = m)
-   
-   
    #fig2
    
+   fig2 = fig2 %>% plotly::layout(
+      
+      title = list(text = 'MS scans detected',
+                   font = list(family = 'Times New Roman', size = 18, color = "#7f7f7f")),
+     
+      xaxis = list(title = "rt (min)",
+                   font = list(family ='Times New Roman', size = 7, color = "#7f7f7f"), 
+                   showgrid = T,
+                   zeroline = F,
+                   showline = F
+                   ),
+      
+      yaxis = list(zeroline = T,showgrid = T,
+                   title = "Intensity",
+                   font = list(family ='Times New Roman', size = 7, color = "#7f7f7f"),
+                   
+                   exponentformat = "e"),
+      
+      showlegend = FALSE,
+      
+      margin = m)
    
+
+   #############################################
+   ### Plot the ms1 peak
    mz = e2$mz_ms1
    wmx = which.max((  lapply(spectra[e$scan], function(x) getPeak(x,mz,7)$y)))
    
    spectrum = spectra[[e$scan[wmx]]]
    
-   fig3 = plotPeak.plotly(spectrum, mz,7,col=4, title = 'MS1 isotopes')
+   fig3 = plotPeak.plotly(spectrum, mz,7,col='rgb(10, 10, 256)', title = 'MS1 isotopes')
    
-   ax = list(title = 'm/z')
+   ax = list(title = 'm/z', showgrid= T)
+   ay = list(zeroline = T, showgrid = T)
    
-   fig3 <- fig3 %>% layout( xaxis = ax)
-   fig3
+   fig3 <- fig3 %>% layout( xaxis = ax, yaxis = ay, margin = m)
+
    
-   
+   #############################################
+   ### Plot the ms2 peak
    mz = e2$mz_ms2
-   wmx = which.max((  lapply(spectra[e$scan], function(x) getPeak(x,mz,7)$y)))
+   wmx = which.max((  lapply(spectra[(e$scan+1)], function(x) getPeak(x,mz,7)$y)))
    
-   fig4 = plotPeak.plotly(spectrum, mz,7,col=4, title = 'MS2 isotopes')
+   spectrum = spectra[[(e$scan+1)[wmx]]]
+   
+   fig4 = plotPeak.plotly(spectrum, mz,7,col='rgb(256, 10, 10)', title = 'MS2 isotopes')
+   
+   ax = list(title = 'm/z', showgrid= T)
+   ay = list(zeroline = T, showgrid = T)
+   
+   fig4 <- fig4 %>% layout( xaxis = ax, yaxis = ay ,margin = m )
    
    
-   #fig4
-   sfig = plotly::subplot(fig, fig2,fig3,fig4,nrows = 2)
-   sfig = sfig %>% plotly::layout(title = tt,
-                           title3 = 'MS1 Isotopes')
+   ##############################################
+   
+   sfig = plotly::subplot(fig, fig2,fig3,fig4,nrows = 2, margin = 0.075)
+   sfig = sfig %>% plotly::layout(title = tt )
    sfig
+   
    wd = getwd()
    fileHandle <- paste(wd,'/',plot_dir,'/',sample_name,'_',pk_group,".html",sep="")
    htmlwidgets::saveWidget(sfig, fileHandle, selfcontained = T)
