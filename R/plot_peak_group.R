@@ -294,6 +294,7 @@ createTables <- function(){
                      # fixedColumns = list(leftColumns = 3
                   ))#)
    
+   wd = getwd()
    fileHandle <- paste(wd,'/',sample_dir,'/',sample_name,".html",sep="")
    htmlwidgets::saveWidget(dt, fileHandle, selfcontained = T)
    

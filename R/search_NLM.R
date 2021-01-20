@@ -119,6 +119,7 @@ search_NLM <-  function(file = NULL,type = 'SIM', raw = FALSE, delta_search_mass
   knwn  = find_known_adducts(search_tol = 10,minscore = 0.7)
   
   create_hit_table()
+  
   if(plot){
     plot_dna_adduct_map(knowns = F)
     
