@@ -36,6 +36,7 @@ create_ref_table = function(table_name,db.list, ppm, rt_tol){
    mt = merge_tables(dat[[1]],dat[[2]], ppm = ppm, rt_tol = rt_tol)
    mt = refine_table(mt, ppm = ppm, rt_tol = rt_tol)
    print(nrow(mt))
+   
 
    for(i in 3:length(dat)){
 

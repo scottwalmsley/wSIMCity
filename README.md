@@ -8,7 +8,7 @@
 1. Install using Rstudio or similar.  Dependencies are in the DESCRIPTION file: mzR, RSQLite, Rdisop, dplyr, ggplot2, viridis, hrbrthemes, plotly, htmlwidgets, withr, DT
 
 
-2. Create a project folder and place your mzML files there.
+2. Create a project folder and place your RAW and mzML files there (for now, raw files need to be in the folder for path finding purposes).
 
 3. Convert your wide SIM / MS2 data using proteowizard. Centroid data ONLY and use ```--simAsSpectra ``` flag!:
 ```
